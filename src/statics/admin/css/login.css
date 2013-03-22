@@ -1,0 +1,9 @@
+body{background:url(../img/login/bg.png);}
+.wrap{width:540px;margin:150px auto 0;}
+h1 a{display:block;height:100px;width:540px;overflow:hidden; text-indent:-2000em;background:url(../img/login/logo.png) no-repeat;margin-bottom:60px;}
+.login{height:45px;}
+.login .input{border:1px solid;border-color:#19313e #3a5867 #3a5867 #19313e;background:url(../img/login/input.png);width:190px;padding:10px;font:bold 16px Arial;vertical-align:middle;margin:0 15px 0 0;color:#fff;float:left;}
+.login .input:focus{ background-position:0 -60px;}
+.login .btn{width:85px;height:40px;border:0 none;padding:0;margin:0;vertical-align:middle;float:left;}
+.input_text{float:left;}
+label{position:absolute;margin-top:-23px;color:#fff;}
