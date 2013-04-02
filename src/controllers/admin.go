@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"io"
-	// "fmt"
 	"dogo"
     models "models"
 )
@@ -12,7 +11,10 @@ type Admin struct {
 }
 
 func (c *Admin) Init() {
+	//c.Layout("header", "layout/header.html")
+	//c.Layout("footer", "layout/footer.html")
 }
+
 
 func (c *Admin) Index() {
 	/*user := models.NewUserModel()
@@ -33,11 +35,15 @@ func (c *Admin) Index() {
 	// d["created"] = "2012-12-12"
 	/*id,_ := user.Sets(d).Add();
 	fmt.Println(id)*/
+	//
 	
-	c.Render()
 }
 
 func (c *Admin) Login() {
+	 c.DisableView()
+}
+
+func (c *Admin) Login_Post() {
 	params := []string{"username", "password"}
 
 	values := c.GetPost(params)

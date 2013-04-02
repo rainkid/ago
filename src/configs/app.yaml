@@ -1,5 +1,19 @@
 #app config
-[default]
+[test]
+name = dogo
+host = 127.0.0.1
+port = 8090
+
+statics = /src/statics
+
+[product]
+name = dogo
+host = 127.0.0.1
+port = 8090
+
+statics = /src/statics
+
+[develop]
 name = dogo
 host = 127.0.0.1
 port = 8090

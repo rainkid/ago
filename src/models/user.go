@@ -11,7 +11,7 @@ type User struct{
 
 func NewUserModel() *User{
 	user := &User{}
-	user.Table("userinfo");
+	user.Table("admin_user");
 	return user
 }
 

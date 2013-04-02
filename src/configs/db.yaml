@@ -1,4 +1,18 @@
-[default]
+[test]
+host = 127.0.0.1
+port = 3306
+username = root
+password = root
+dbname = golang
+
+[develop]
+host = 127.0.0.1
+port = 3306
+username = root
+password = root
+dbname = gou
+
+[product]
 host = 127.0.0.1
 port = 3306
 username = root
