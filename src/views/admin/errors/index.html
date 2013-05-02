@@ -1,0 +1,22 @@
+{{define "content"}}
+<html>
+<head>
+<meta charset="utf-8" />
+<title>管理中心 Management center</title>
+<link href="/statics/admin/css/style.css" rel="stylesheet" />
+</head>
+<body>
+<div class="wrap">
+    <div id="error_tips">
+        <h2>信息提示</h2>
+        <div class="error_cont">
+            <ul>
+                <li>{{.msg}}</li>
+            </ul>
+            <div class="error_return"><a href="javascript:history.back()" class="btn">返回</a></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+{{end}}
