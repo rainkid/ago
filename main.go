@@ -1,12 +1,11 @@
 package main
 
 import (
-	// "fmt"
+	"dogo"
+	"fmt"
+	admin "modules/admin"
 	"os"
 	"path"
-	"dogo"
-	controllers "controllers"
-	// models "models"
 )
 
 func main() {
@@ -16,23 +15,26 @@ func main() {
 	configPath := path.Join(basePath, "src/configs", "app.yaml")
 
 	// bootstrap and return a app
-	app := dogo.Bootstrap(configPath, "develop")
+	app, err := dogo.Bootstrap(configPath)
+	if err != nil {
+		fmt.Println(err)
+	}
 	app.AddRouter(router)
 
 	//app run
 	app.Run()
 }
 
-func getRouter() *dogo.Router{
+func getRouter() *dogo.Router {
 	// new dogo router
 	var router = dogo.NewRouter()
-	
-	//AddRegexRoute
-	regexRoute := dogo.NewRegexRoute("/get/:uid", controllers.Home)
-	router.AddRegexRoute(regexRoute)
 
-	//add map route 
-	mapRoute := dogo.NewMapRoute(&controllers.Admin{})
-	router.AddMapRoute(mapRoute)
+	//AddRegexRoute
+	//router.AddRegexRoute("/get/:uid", controllers.Home)
+
+	//add map route
+	router.AddMapRoute("admin", &admin.Errors{})
+	router.AddMapRoute("admin", &admin.Login{})
+	router.AddMapRoute("admin", &admin.Index{})
 	return router
 }
