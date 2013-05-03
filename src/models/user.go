@@ -1,20 +1,21 @@
 package models
 
 import (
-	"dogo"
 	"fmt"
 	lib "lib"
 )
 
 type User struct {
-	dogo.Model
+	Model
 	hash string
+	code int64
 }
 
 func NewUserModel() *User {
 	user := &User{}
 	user.TableName = "admin_user"
 	user.hash = "A#a&(_=)"
+	user.code = 1000
 	return user
 }
 
@@ -41,11 +42,11 @@ func (u *User) Login() (int64, string) {
 		fmt.Println(destr)
 
 		if err != nil {
-			return 1004, ""
+			return u.code + 1, ""
 		}
 		return 0, cstr
 	}
-	return 1003, ""
+	return u.code + 2, ""
 }
 
 func (u *User) IsLogin(str string) bool {
@@ -59,11 +60,11 @@ func (u *User) Valid() (int64, string) {
 
 	data := u.GetData()
 	if ok, _ := data["username"]; ok == nil {
-		return 1001, ""
+		return u.code + 3, ""
 	}
 
 	if ok, _ := data["password"]; ok == nil {
-		return 1002, ""
+		return u.code + 4, ""
 	}
 	return 0, ""
 }
