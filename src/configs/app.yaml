@@ -1,6 +1,6 @@
 #app config
 [base]
-env = develop
+environ = develop
 
 [test]
 name = dogo
@@ -8,6 +8,7 @@ host = 127.0.0.1
 port = 8090
 
 statics = /src/statics
+adminroot = http://127.0.0.1:8090
 
 [product]
 name = dogo
@@ -15,6 +16,7 @@ host = 127.0.0.1
 port = 8090
 
 statics = /src/statics
+adminroot = http://127.0.0.1:8090
 
 [develop]
 name = dogo
@@ -22,3 +24,4 @@ host = 127.0.0.1
 port = 8090
 
 statics = /src/statics
+adminroot = http://127.0.0.1:8090

@@ -1,3 +1,107 @@
 {{define "content"}}
-This is content.
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>管理系统</title>
+<meta charset="UTF-8">
+<link href="{{.adminroot}}/statics/admin/css/layout.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="{{.adminroot}}/statics/admin/css/jquery-ui.css" />
+</head>
+<body>
+<div class="wrap">
+<table width="100%" cellpadding="0" cellspacing="0" height="100%">
+	<tr class="head">
+		<th height="60"><a href="#" class="logo"></a></th>
+		<td height="60">
+			<div class="nav">
+				<ul id="B_main_block">
+ 					{{range .Menus}}
+				    <li id="{{.ID}}"><a class="" href="#{{.ID}}">{{.Name}}</a></li>
+				    {{end}}					
+	       		</ul>
+			</div>
+			<div class="login_info">
+				<span class="mr10">管理员：testa</span>
+					<a href="#" onclick="openWin('admin_system-0-admin_user_passwd','/admin/user/passwd','修改密码');" class="mr10">[修改密码]</a>
+					<a href="/admin/login/logout" class="mr10">[注销]</a>
+			</div>
+		</td>
+	</tr>
+	<tr class="tab">
+		<th>
+			<div class="search">
+				<input id="keyword" size="15" class="gray" onFocus="adminSearchClass.focus();" onBlur="adminSearchClass.blur();" onKeyUp="adminSearchClass.keyup(event);" onKeyDown="javascript:void(0);" value="后台搜索" type="text">
+				<button type="button" name="keyword" value="" onClick="adminSearchClass.search();">
+				<img src="http://assets.3gtest.gionee.com/apps/admin/img/layout/search.png" onClick="adminSearchClass.search();" align="absmiddle"></button>
+			</div>
+		</th>
+		<td>
+ 			<div id="B_tabA" class="tabA">
+				<a href="javascript:;" class="tabA_pre" onClick="prev()" title="上一个">上一个</a>
+				<a href="javascript:;" class="tabA_next" onClick="next()" title="下一个">下一个</a>
+      	<ul id="B_history"></ul>
+      </div>
+		</td>
+	</tr>
+	<tr class="content">
+		<th>
+		 <div id="B_menunav">
+				<div class="menubar">
+					<dl id="B_menubar">
+						<dt class="disabled"></dt>
+					</dl>
+				</div>
+				<div id="menu_next" class="menuNext" style="visibility: hidden">
+					<a href="javascript:;" class="pre" title="上一页">上一页</a>
+					<a href="javascript:;" class="next" title="下一页">下一页</a>
+				</div>
+			</div>
+		</th>
+		<td id="B_frame">
+			<div id="breadCrumb" style="display:none;"></div>
+			 <div class="options">
+			 	<a href="#" class="refresh" title="刷新" onClick="frameRefresh()">刷新</a>&nbsp;|&nbsp;
+			 	<a href="javascript://" id="fullScreen" class="admin_full" title="全屏">全屏</a></div>
+				<iframe id="default" src="/admin/index/default" style="height: 100%; width: 100%;" frameborder="0" scrolling="0"></iframe>
+		</td>
+	</tr>
+</table>
+</div>
+<script src="{{.adminroot}}/statics/admin/js/common/jquery.js"></script>
+<script src="{{.adminroot}}/statics/admin/js//common/jquery-ui.min.js"></script>
+<script src="{{.adminroot}}/statics/admin/js/common/jquery.form.js"></script>
+<script src="{{.adminroot}}/statics/admin/js/common/common.js"></script>
+<script type="text/javascript">
+var USUALL = []; /*常用的功能模块*/
+var TEMP = [];
+var SUALL = USUALL.concat('-',[{name:'最近操作',disabled:true}],TEMP);
+var MAIN_BLOCK = eval({{.JsonViews}});/*主菜单区*/
+var SUBMENU_CONFIG = eval({{.JsonMenus}});
+var FULL_CSS = "{{.adminroot}}/statics/admin/css/fullscreen.css";
+var agt = navigator.userAgent.toLowerCase();
+var is_ie = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
+var is_gecko = (navigator.product=='Gecko');
+var imgpath = '{{.adminroot}}/statics/admin/img';
+var times = 0;
+var baseurl = '{{.adminroot}}';
+var getdescurl = '{{.adminroot}}/admin/index/getdesc';
+var searchurl = '{{.adminroot}}/admin/index/search';
+var token = '{{.token}}';
+
+$(window).ready(function(){
+	adminNavClass.initTips = initTips;
+	init();
+	adminSearchClass.init();
+	if(parent.adminNavClass){
+        parent.adminNavClass.initTips();
+    }
+	if(window.frameElement){
+	    parent.location.href = window.location.href;
+	}
+});
+</script>
+<script src="{{.adminroot}}/statics/admin/js/common/Cookie.js"></script>
+<script src="{{.adminroot}}/statics/admin/js/admin.js"></script>
+</body>
+</html>
 {{end}}

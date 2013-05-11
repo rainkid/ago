@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	lib "lib"
+	lib "libs"
 )
 
 type User struct {

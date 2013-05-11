@@ -2,6 +2,7 @@ package admin
 
 import (
 	"dogo"
+	libs "libs"
 	models "models"
 )
 
@@ -16,4 +17,10 @@ func (c *AdminBase) CheckLogin() {
 	if user.IsLogin(cookieStr) == false {
 		c.Redirect("/admin/login/index", nil)
 	}
+}
+
+func (c *AdminBase) Assigns() {
+	adminroot := libs.GetConfig("app", "adminroot")
+	c.Set("adminroot", adminroot)
+	c.Set("token", c.GetToken())
 }

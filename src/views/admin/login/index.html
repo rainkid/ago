@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8" />
 <title>管理中心 Management center</title>
-<link href="/statics/admin/login.css" rel="stylesheet" />
+<link href="{{.adminroot}}/statics/admin/login.css" rel="stylesheet" />
 <script>if (parent.window.location.href != location.href) parent.window.location.href = location.href;</script>
 </head>
 <body>
 <div class="wrap">
 	<h1><a href="#">管理中心</a></h1>
-	<form method="post" name="login" action="/admin/login/login"><!-- action = //逃避自动匹配 -->
+	<form method="post" name="login" action="{{.adminroot}}/admin/login/login"><!-- action = //逃避自动匹配 -->
 		<input name="token" type="hidden" value="{{.token}}" />
 	<div class="login">
 		<div class="input_text"><label for="admin_name">帐号名</label></div>
 		<input class="input" id="admin_name" name="username" type="text" tabindex="1" />
 		<div class="input_text"><label for="admin_pwd">密码</label></div>
 		<input class="input" id="admin_pwd" type="password" name="password" tabindex="2" />
-		<input name="submit" type="image" class="btn" src="http://assets.3gtest.gionee.com/apps/admin/img/login/btn.png" />
+		<input name="submit" type="image" class="btn" src="{{.adminroot}}/statics/admin/img/login/btn.png" />
 	</div>
 	</form>
 </div>

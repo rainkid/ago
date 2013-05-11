@@ -1,17 +1,21 @@
 package admin
 
 import (
-	"dogo"
 	"fmt"
+	// libs "libs"
 	models "models"
 )
 
 type Login struct {
-	dogo.Controller
+	AdminBase
+}
+
+func (c *Login) Init() {
+	c.Assigns()
 }
 
 func (c *Login) Index() {
-	c.Set("token", c.GetToken())
+
 }
 
 func (c *Login) Login() {
@@ -34,4 +38,9 @@ func (c *Login) Login() {
 	}
 	c.SetCookie("Admin_User", msg, 60*60*24)
 	c.Redirect("/admin/index/index", nil)
+}
+
+func (c *Login) Logout() {
+	c.DelCookie("Admin_User")
+	c.Redirect("/admin/login/login", nil)
 }

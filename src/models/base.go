@@ -3,7 +3,9 @@ package models
 import (
 	"database/sql"
 	"fmt"
-	mdb "lib/db"
+	mdb "libs/db"
+	"os"
+	"path"
 	"strings"
 )
 
@@ -121,7 +123,9 @@ func (m *Model) GetData() DataMap {
 }
 
 func (m *Model) DBHandler() *mdb.Mysql {
-	return mdb.NewMysql()
+	basepath, _ := os.Getwd()
+	file := path.Join(basepath, "src/configs", "db.yaml")
+	return &mdb.Mysql{ConfigFile: file}
 }
 
 func (m *Model) IsValid() bool {

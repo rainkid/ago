@@ -2,7 +2,7 @@ package main
 
 import (
 	"dogo"
-	"fmt"
+	// "fmt"
 	admin "modules/admin"
 	"os"
 	"path"
@@ -10,31 +10,29 @@ import (
 
 func main() {
 	router := getRouter()
-	//get config
-	basePath, _ := os.Getwd()
-	configPath := path.Join(basePath, "src/configs", "app.yaml")
-
 	// bootstrap and return a app
-	app, err := dogo.Bootstrap(configPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	app.AddRouter(router)
 
-	//app run
-	app.Run()
+	basepath, _ := os.Getwd()
+	file := path.Join(basepath, "src/configs", "app.yaml")
+	app := dogo.NewApp(file)
+
+	app.Bootstrap(router).SetDefaultModule("admin").Run()
 }
 
 func getRouter() *dogo.Router {
 	// new dogo router
 	var router = dogo.NewRouter()
+	basepath, _ := os.Getwd()
 
 	//AddRegexRoute
 	//router.AddRegexRoute("/get/:uid", controllers.Home)
 
 	//add map route
-	router.AddMapRoute("admin", &admin.Errors{})
-	router.AddMapRoute("admin", &admin.Login{})
-	router.AddMapRoute("admin", &admin.Index{})
+	router.AddSampleRoute("admin", &admin.Errors{})
+	router.AddSampleRoute("admin", &admin.Login{})
+	router.AddSampleRoute("admin", &admin.Index{})
+
+	router.AddStaticRoute("/statics", path.Join(basepath, "src/statics/"))
+
 	return router
 }
