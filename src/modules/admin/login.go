@@ -11,7 +11,7 @@ type Login struct {
 }
 
 func (c *Login) Init() {
-	c.Assigns()
+	c.InitParams()
 }
 
 func (c *Login) Index() {

@@ -13,14 +13,14 @@ type Index struct {
 
 func (c *Index) Init() {
 	c.CheckLogin()
-	c.Assigns()
+	c.InitParams()
 }
 
 func (c *Index) Index() {
 	menu := configs.NewMenu()
-	c.Set("JsonViews", menu.ToJson(menu.Views))
-	c.Set("JsonMenus", menu.ToJson(menu.Menus))
-	c.Set("Menus", menu.Menus)
+	c.Assign("JsonViews", menu.ToJson(menu.Views))
+	c.Assign("JsonMenus", menu.ToJson(menu.Menus))
+	c.Assign("Menus", menu.Menus)
 }
 
 func (c *Index) Default() {

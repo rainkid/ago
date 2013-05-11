@@ -24,9 +24,6 @@ func getRouter() *dogo.Router {
 	var router = dogo.NewRouter()
 	basepath, _ := os.Getwd()
 
-	//AddRegexRoute
-	//router.AddRegexRoute("/get/:uid", controllers.Home)
-
 	//add map route
 	router.AddSampleRoute("admin", &admin.Errors{})
 	router.AddSampleRoute("admin", &admin.Login{})

@@ -19,8 +19,8 @@ func (c *AdminBase) CheckLogin() {
 	}
 }
 
-func (c *AdminBase) Assigns() {
+func (c *AdminBase) InitParams() {
 	adminroot := libs.GetConfig("app", "adminroot")
-	c.Set("adminroot", adminroot)
-	c.Set("token", c.GetToken())
+	c.Assign("adminroot", adminroot)
+	c.Assign("token", c.GetToken())
 }
