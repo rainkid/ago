@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"dogo"
 	"fmt"
-	_ "github.com/Go-SQL-Driver/MySQL"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Mysql struct {
@@ -35,6 +35,7 @@ func (m *Mysql) Fetch(s string) (*sql.Row, error) {
 	defer db.Close()
 
 	row := db.QueryRow("select * from admin_user limit 0,1")
+
 	return row, nil
 }
 

@@ -16,6 +16,16 @@ func NewUserModel() *User {
 	user.TableName = "admin_user"
 	user.hash = "A#a&(_=)"
 	user.code = 1000
+	user.Fields = []string{
+		"uid",
+		"username",
+		"password",
+		"hash",
+		"email",
+		"registertime",
+		"registerip",
+		"groupid",
+	}
 	return user
 }
 
@@ -35,6 +45,7 @@ func (u *User) Login() (int64, string) {
 		var groupid int64
 
 		row.Scan(&uid, &username, &password, &hash, &email, &registertime, &registerip, &groupid)
+		fmt.Println(uid, username, hash)
 		str := fmt.Sprintf("%d|%s|%s", uid, username, hash)
 		cstr, err := lib.Encrypt(str, u.hash)
 		destr, err := lib.Decrypt(cstr, u.hash)

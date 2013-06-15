@@ -21,6 +21,7 @@ type Model struct {
 	TableName string
 	Data      DataMap
 	Filters   DataMap
+	Fields    []string
 }
 
 func (m *Model) InitData() {

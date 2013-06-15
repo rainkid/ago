@@ -249,8 +249,6 @@ function showMenu2(target) {
 	ttl.html(title);
 	dl.html('');
 
-	console.log(data)
-
 	$.each(data.Items, function(index, o) {
 				if (o.Items && 0 == o.Items.length)
 					return;

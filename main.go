@@ -33,7 +33,7 @@ func getRouter() *dogo.Router {
 	router.AddSampleRoute("admin", &admin.Login{})
 	router.AddSampleRoute("admin", &admin.Index{})
 
-	//add regex router and default is sample reoute
+	//add regex router and default is sample route
 	router.AddRegexRoute("/login", "/admin/login/index")
 
 	return router

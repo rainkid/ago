@@ -42,5 +42,5 @@ func (c *Login) Login() {
 
 func (c *Login) Logout() {
 	c.DelCookie("Admin_User")
-	c.Redirect("/admin/login/login", nil)
+	c.Redirect("/admin/index/index", nil)
 }
