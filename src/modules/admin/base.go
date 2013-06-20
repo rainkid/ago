@@ -2,7 +2,7 @@ package admin
 
 import (
 	"dogo"
-	libs "libs"
+	utils "libs/utils"
 	models "models"
 )
 
@@ -20,7 +20,7 @@ func (c *AdminBase) CheckLogin() {
 }
 
 func (c *AdminBase) InitParams() {
-	adminroot := libs.GetConfig("app", "adminroot")
+	adminroot := utils.GetConfig("app", "adminroot")
 	c.Assign("adminroot", adminroot)
 	c.Assign("token", c.GetToken())
 }

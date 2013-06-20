@@ -1,137 +1,129 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
-	mdb "libs/db"
+	db "libs/db"
+	utils "libs/utils"
 	"os"
 	"path"
 	"strings"
 )
 
-type DataMap map[string]interface{}
-
-type ModelInterface interface {
-	IsValid() bool
-	Valid() (int64, string)
-}
-
 type Model struct {
-	ModelInterface
-	TableName string
-	Data      DataMap
-	Filters   DataMap
-	Fields    []string
+	TableName  string
+	PrimaryKey string
+	Data       map[string]interface{}
+
+	where string
+	args  []interface{}
+
+	limit   string
+	orderby string
+	groupby string
 }
 
-func (m *Model) InitData() {
-	if m.Data == nil {
-		m.Data = make(DataMap)
+func NewModel(tableName, primaryKey string) *Model {
+	return &Model{TableName: tableName, PrimaryKey: primaryKey}
+}
+
+//params
+func (model *Model) Wherep(id int) {
+	model.where = fmt.Sprintf(" WHERE %s = %d ", model.PrimaryKey, id)
+}
+
+func (model *Model) Where(where string, args ...interface{}) *Model {
+	model.where, model.args = fmt.Sprintf(" WHERE %s ", where), args
+	return model
+}
+
+func (model *Model) Limit(start, offset int) *Model {
+	model.limit = fmt.Sprintf(" LIMIT %d,%d ", start, offset)
+	return model
+}
+
+func (model *Model) OrderBy(orderby ...string) *Model {
+	model.orderby = " ORDER BY " + strings.Join(orderby, ",") + " "
+	return model
+}
+
+func (model *Model) GroupBy(groupby string) {
+	model.groupby = groupby
+}
+
+//select query
+func (model *Model) Gets() (results []map[string][]byte, err error) {
+	query := fmt.Sprintf("SELECT * FROM %s%s%s%s", model.GetTable(), model.where, model.orderby, model.limit)
+	results, err = model.Db().FetchAll(query, model.args...)
+	return results, err
+}
+
+func (model *Model) Get() (result map[string][]byte, err error) {
+	query := fmt.Sprintf("SELECT * FROM %s%s%s", model.GetTable(), model.where, model.orderby)
+	result, err = model.Db().Fetch(query, model.args...)
+	return result, err
+}
+
+//count
+func (model *Model) Count() (int64, error) {
+	var total int64
+	query := fmt.Sprintf("SELECT COUNT(*) AS total FROM %s %s", model.GetTable(), model.where)
+	row, err := model.Db().FetchRow(query, model.args...)
+	if err != nil {
+		return total, err
 	}
-}
-
-func (m *Model) InitFilter() {
-	if m.Filters == nil {
-		m.Filters = make(DataMap)
+	err = row.Scan(&total)
+	if err != nil {
+		return total, err
 	}
+	return total, nil
 }
 
-func (m *Model) Set(key string, value interface{}) *Model {
-	m.InitData()
-	m.Data[key] = value
-	return m
+func (model *Model) SetData(data map[string]interface{}) *Model {
+	model.Data = data
+	return model
 }
 
-func (m *Model) Sets(values DataMap) *Model {
-	m.InitData()
-	if len(values) > 0 {
-		for key, value := range values {
-			m.Data[key] = value
-		}
-	}
-	return m
+func (model *Model) GetData(field string) ([]byte, int64) {
+	return utils.IValue(model.Data[field])
 }
 
-func (m *Model) Where(key string, value interface{}) *Model {
-	m.InitFilter()
-	m.Filters[key] = value
-	return m
-}
-
-func (m *Model) Add() (int64, error) {
-	db := m.DBHandler()
-
-	data := m.SqlWhere(m.Data, ",")
-	sql := fmt.Sprintf("INSERT INTO %s SET %s", m.TableName, data)
-
-	res, err := db.Execute(sql)
+//update 
+func (model *Model) Update() (int64, error) {
+	str, args := model.CookMap(model.Data, " =?, ")
+	query := fmt.Sprintf("UPDATE %s SET %s", model.GetTable(), str)
+	result, err := model.Db().Execute(query, args...)
 	if err != nil {
 		return 0, err
 	}
-	id, err := res.LastInsertId()
-	return id, err
+	return result, err
 }
 
-func (m *Model) Get() (*sql.Row, error) {
-	db := m.DBHandler()
-
-	where := m.SqlWhere(m.Filters, " AND")
-	sql := fmt.Sprintf("SELECT * FROM %s WHERE %s LIMIT 0,1 ", m.TableName, where)
-	row, err := db.Fetch(sql)
-	return row, err
-}
-
-func (m *Model) Gets() (*sql.Rows, error) {
-	db := m.DBHandler()
-
-	where := m.SqlWhere(m.Filters, " AND")
-	sql := fmt.Sprintf("SELECT * FROM %s WHERE %s", m.TableName, where)
-
-	rows, err := db.FetchAll(sql)
-	return rows, err
-}
-
-func (m *Model) Delete() (int64, error) {
-	db := m.DBHandler()
-
-	where := m.SqlWhere(m.Filters, " AND")
-	sql := fmt.Sprintf("DELETE FROM %s WHERE %s", m.TableName, where)
-
-	res, err := db.Execute(sql)
+//delete 
+func (model *Model) Delete() (int64, error) {
+	query := fmt.Sprintf("DELETE FROM %s WHERE %s", model.GetTable(), model.where)
+	result, err := model.Db().Execute(query, model.args...)
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
-	affect, err := res.RowsAffected()
-	return affect, err
-
+	return result, nil
 }
 
-func (m *Model) SqlWhere(dm DataMap, split string) string {
-	strs := []string{}
-	for k, v := range dm {
-		strs = append(strs, fmt.Sprintf("%s %s='%s'", split, k, v))
+func (base *Model) CookMap(data map[string]interface{}, sep string) (string, []interface{}) {
+	var fields []string
+	var values []interface{}
+	for field, value := range data {
+		fields = append(fields, field)
+		values = append(values, value)
 	}
-	return strings.Trim(strings.Trim(strings.Trim(strings.Join(strs, ""), " "), ","), split)
+	return strings.Join(fields, sep) + sep, values
 }
 
-func (m *Model) Valid() (int64, string) {
-	return 0, ""
+func (model *Model) GetTable() string {
+	return model.TableName
 }
 
-func (m *Model) GetData() DataMap {
-	m.InitData()
-	return m.Data
-}
-
-func (m *Model) DBHandler() *mdb.Mysql {
+func (model *Model) Db() *db.Mysql {
 	basepath, _ := os.Getwd()
-	file := path.Join(basepath, "src/configs", "db.yaml")
-	return &mdb.Mysql{ConfigFile: file}
-}
-
-func (m *Model) IsValid() bool {
-	if code, _ := m.Valid(); code != 0 {
-		return false
-	}
-	return true
+	file := path.Join(basepath, "src/configs", "mysql.yaml")
+	return db.NewMysql(file)
 }

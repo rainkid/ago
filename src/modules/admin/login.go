@@ -2,7 +2,6 @@ package admin
 
 import (
 	"fmt"
-	// libs "libs"
 	models "models"
 )
 
@@ -20,11 +19,10 @@ func (c *Login) Index() {
 
 func (c *Login) Login() {
 	params := []string{"username", "password"}
-
 	values := c.GetPost(params)
 
 	user := models.NewUserModel()
-	user.Sets(values)
+	user.SetData(values)
 
 	if code, _ := user.Valid(); code != 0 {
 		c.Redirect(fmt.Sprintf("/admin/errors/index?code=%d", code), nil)

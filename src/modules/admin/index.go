@@ -1,10 +1,7 @@
 package admin
 
 import (
-	// "fmt"
-	// models "models"
-	// am_lib "lib/admin"
-	configs "configs"
+	admin "libs/admin"
 )
 
 type Index struct {
@@ -17,7 +14,7 @@ func (c *Index) Init() {
 }
 
 func (c *Index) Index() {
-	menu := configs.NewMenu()
+	menu := admin.NewMenu()
 	c.Assign("JsonViews", menu.ToJson(menu.Views))
 	c.Assign("JsonMenus", menu.ToJson(menu.Menus))
 	c.Assign("Menus", menu.Menus)

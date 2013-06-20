@@ -1,65 +1,111 @@
 package admin
 
 import (
-	configs "configs"
 	"encoding/json"
 	"fmt"
 )
 
-type MenuItem map[string]string
-type MenuMap map[string]interface{}
-
 type Menu struct {
-	menus []MenuItem
+	Menus []Item
+	Views []Item
+}
+
+type Item struct {
+	ID    string
+	Name  string
+	Url   string
+	Items []Item
 }
 
 func NewMenu() *Menu {
-	return &Menu{}
+	m := &Menu{}
+	m.InitMenu()
+	return m
 }
 
-func (m *Menu) GetJson() {
-	var vo interface{}
-	views := configs.GetMenu()
-	json.Unmarshal(views, &vo)
-	for _, v := range vo.(map[string]interface{}) {
-		m.Match(v)
+func (m *Menu) Init() {
+	m.Menus = []Item{
+		Item{
+			ID:   "admin_system",
+			Name: "系统",
+			Items: []Item{
+				Item{
+					ID:   "0",
+					Name: "用户",
+					Items: []Item{
+						Item{
+							ID:   "admin_user",
+							Name: "用户管理",
+							Url:  "/admin/user/index",
+						},
+						Item{
+							ID:   "admin_group",
+							Name: "用户组管理",
+							Url:  "/admin/group/index",
+						},
+						Item{
+							ID:   "admin_user_passwd",
+							Name: "修改密码",
+							Url:  "/admin/user/password",
+						},
+					},
+				},
+			},
+		},
+		Item{
+			ID:   "admin_yuning",
+			Name: "内容库",
+			Items: []Item{
+				Item{
+					ID:   "1",
+					Name: "用户",
+					Items: []Item{
+						Item{
+							ID:   "admin_user1",
+							Name: "用户管理1",
+							Url:  "/admin/user/index",
+						},
+						Item{
+							ID:   "admin_group2",
+							Name: "用户组2",
+							Url:  "/admin/group/index",
+						},
+						Item{
+							ID:   "admin_user_passwd3",
+							Name: "修改密码3",
+							Url:  "/admin/user/password",
+						},
+					},
+				},
+			},
+		},
 	}
+}
 
-	b, err := json.Marshal(m.menus)
+func (m *Menu) InitMenu() {
+	m.Init()
+
+	m.InitViews(m.Menus)
+	// fmt.Println(m.ToJson(m.Views))
+}
+
+func (m *Menu) ToJson(Items []Item) string {
+	b, err := json.Marshal(Items)
 	if err != nil {
-		fmt.Println(err, b)
+		fmt.Println("error:", err)
 	}
+	return string(b)
 }
 
-func (m *Menu) Match(pitem interface{}) {
-	switch el := pitem.(type) {
-	case map[string]interface{}:
-
-		m.AddItem(el)
-
-		if el["items"] != nil {
-			m.Match(el["items"].([]interface{}))
+func (m *Menu) InitViews(Items []Item) {
+	for _, v := range Items {
+		if v.Items != nil {
+			m.InitViews(v.Items)
 		}
-	case []interface{}:
-		for _, v := range el {
-
-			child := v.(map[string]interface{})
-			m.AddItem(child)
-
-			if child["items"] != nil {
-				m.Match(child["items"].([]interface{}))
-			}
-		}
-	default:
+		m.Views = append(m.Views, Item{
+			ID:   v.ID,
+			Name: v.Name,
+			Url:  v.Url,
+		})
 	}
-}
-
-func (m *Menu) AddItem(child MenuMap) {
-	item := make(MenuItem)
-	if child["url"] != nil {
-		item["url"] = child["url"].(string)
-	}
-	item["name"] = child["name"].(string)
-	item["id"] = child["id"].(string)
-	m.menus = append(m.menus, item)
 }

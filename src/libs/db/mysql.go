@@ -2,72 +2,143 @@ package db
 
 import (
 	"database/sql"
-	"dogo"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	utils "libs/utils"
+	"reflect"
 )
 
+//mysql
 type Mysql struct {
-	ConfigFile string
+	Config string
 }
 
-func (m *Mysql) FetchAll(s string) (*sql.Rows, error) {
-	dsn := m.Dsn()
+func NewMysql(config string) *Mysql {
+	return &Mysql{Config: config}
+}
+
+//query all result
+func (m *Mysql) FetchAll(query string, args ...interface{}) (results []map[string][]byte, err error) {
+	dsn := m.DSN()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	rows, err := db.Query(s)
+	rows, err := db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
-	return rows, err
+
+	for rows.Next() {
+		result, err := m.RowsToMap(rows)
+		if err == nil {
+			results = append(results, result)
+		}
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
 }
 
-func (m *Mysql) Fetch(s string) (*sql.Row, error) {
-	dsn := m.Dsn()
+//query all result
+func (m *Mysql) Fetch(query string, args ...interface{}) (results map[string][]byte, err error) {
+	dsn := m.DSN()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	row := db.QueryRow("select * from admin_user limit 0,1")
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
 
+	if !rows.Next() {
+
+		return nil, rows.Err()
+	}
+	result, err := m.RowsToMap(rows)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (m *Mysql) FetchRow(query string, args ...interface{}) (*sql.Row, error) {
+	dsn := m.DSN()
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	row := db.QueryRow(query, args...)
 	return row, nil
 }
 
-func (m *Mysql) Execute(s string) (sql.Result, error) {
-	dsn := m.Dsn()
+//update and delete
+func (m *Mysql) Execute(query string, args ...interface{}) (int64, error) {
+	dsn := m.DSN()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare(s)
+	stmt, err := db.Prepare(query)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	res, err := stmt.Exec()
+	res, err := stmt.Exec(args...)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	return res, err
+	id, err := res.LastInsertId()
+	if id > 0 {
+		return id, err
+	}
+	affect, err := res.RowsAffected()
+	return affect, err
 }
 
-func (m *Mysql) Dsn() string {
-	config, _ := dogo.NewConfig(m.ConfigFile)
-	env, _ := config.String("base", "env")
+func (m *Mysql) RowsToMap(rows *sql.Rows) (map[string][]byte, error) {
+	result := make(map[string][]byte)
 
-	username, _ := config.String(env, "username")
-	password, _ := config.String(env, "password")
-	host, _ := config.String(env, "host")
-	port, _ := config.Int(env, "port")
-	dbname, _ := config.String(env, "dbname")
+	fields, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8", username, password, host, port, dbname)
-	return dsn
+	var containers []interface{}
+	for i := 0; i < len(fields); i++ {
+		var container interface{}
+		containers = append(containers, &container)
+	}
+	if err := rows.Scan(containers...); err != nil {
+		return nil, err
+	}
+
+	for index, field := range fields {
+		rawValue := reflect.Indirect(reflect.ValueOf(containers[index]))
+
+		if rawValue.Interface() != nil {
+			result[field], _ = utils.IValue(rawValue.Interface())
+		}
+	}
+	return result, nil
+}
+
+func (m *Mysql) DSN() string {
+	username := utils.GetConfig("mysql", "username")
+	password := utils.GetConfig("mysql", "password")
+	host := utils.GetConfig("mysql", "host")
+	port := utils.GetConfig("mysql", "port")
+	dbname := utils.GetConfig("mysql", "dbname")
+
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", username, password, host, port, dbname)
 }
