@@ -346,3 +346,5 @@ span.bts button{color:#cd4604;}
 #deviceList, #osList { border:1px solid #999;background:#fff;padding:3px;margin-top:10px;width:830px;display:none;clear:both; }
 #deviceList li { list-style:none;float:left;width:200px;padding:2px; }
 #osList li { list-style:none;float:left;width:270px;padding:2px; }
+.msg_box{margin: 20px; line-height: 32px; font-size: 14px; display: none}
+.msg_box img {position: relative; margin: -4px 5px 0 0}

@@ -1,10 +1,5 @@
 package admin
 
-import (
-	"encoding/json"
-	"fmt"
-)
-
 type Menu struct {
 	Menus []Item
 	Views []Item
@@ -19,7 +14,8 @@ type Item struct {
 
 func NewMenu() *Menu {
 	m := &Menu{}
-	m.InitMenu()
+	m.Init()
+	m.InitViews(m.Menus)
 	return m
 }
 
@@ -80,21 +76,6 @@ func (m *Menu) Init() {
 			},
 		},
 	}
-}
-
-func (m *Menu) InitMenu() {
-	m.Init()
-
-	m.InitViews(m.Menus)
-	// fmt.Println(m.ToJson(m.Views))
-}
-
-func (m *Menu) ToJson(Items []Item) string {
-	b, err := json.Marshal(Items)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-	return string(b)
 }
 
 func (m *Menu) InitViews(Items []Item) {

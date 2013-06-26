@@ -1,8 +1,7 @@
 package main
 
 import (
-	"dogo"
-	// "fmt"
+	"github.com/rainkid/dogo"
 	admin "modules/admin"
 	"os"
 	"path"
@@ -32,6 +31,9 @@ func getRouter() *dogo.Router {
 	router.AddSampleRoute("admin", &admin.Errors{})
 	router.AddSampleRoute("admin", &admin.Login{})
 	router.AddSampleRoute("admin", &admin.Index{})
+
+	router.AddSampleRoute("admin", &admin.User{})
+	router.AddSampleRoute("admin", &admin.Group{})
 
 	//add regex router and default is sample route
 	router.AddRegexRoute("/login", "/admin/login/index")

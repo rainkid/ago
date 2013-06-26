@@ -1,7 +1,7 @@
 package admin
 
 import (
-	"dogo"
+	"github.com/rainkid/dogo"
 	"strconv"
 )
 

@@ -18,7 +18,7 @@ func NewMysql(config string) *Mysql {
 }
 
 //query all result
-func (m *Mysql) FetchAll(query string, args ...interface{}) (results []map[string][]byte, err error) {
+func (m *Mysql) FetchAll(query string, args ...interface{}) (results []map[string]interface{}, err error) {
 	dsn := m.DSN()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -45,7 +45,7 @@ func (m *Mysql) FetchAll(query string, args ...interface{}) (results []map[strin
 }
 
 //query all result
-func (m *Mysql) Fetch(query string, args ...interface{}) (results map[string][]byte, err error) {
+func (m *Mysql) Fetch(query string, args ...interface{}) (results map[string]interface{}, err error) {
 	dsn := m.DSN()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -59,9 +59,9 @@ func (m *Mysql) Fetch(query string, args ...interface{}) (results map[string][]b
 	}
 
 	if !rows.Next() {
-
 		return nil, rows.Err()
 	}
+
 	result, err := m.RowsToMap(rows)
 	if err != nil {
 		return nil, err
@@ -106,8 +106,8 @@ func (m *Mysql) Execute(query string, args ...interface{}) (int64, error) {
 	return affect, err
 }
 
-func (m *Mysql) RowsToMap(rows *sql.Rows) (map[string][]byte, error) {
-	result := make(map[string][]byte)
+func (m *Mysql) RowsToMap(rows *sql.Rows) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
 
 	fields, err := rows.Columns()
 	if err != nil {
@@ -127,7 +127,7 @@ func (m *Mysql) RowsToMap(rows *sql.Rows) (map[string][]byte, error) {
 		rawValue := reflect.Indirect(reflect.ValueOf(containers[index]))
 
 		if rawValue.Interface() != nil {
-			result[field], _ = utils.IValue(rawValue.Interface())
+			result[field] = rawValue.Interface()
 		}
 	}
 	return result, nil

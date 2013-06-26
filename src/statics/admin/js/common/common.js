@@ -1,6 +1,10 @@
 ﻿// JavaScript Document
 showMsg = function(title, msg) {
 	$("#msg_content").html(msg);
+	var o =$("#msg_box_box"), img = $("#msg_box_box img");
+	if (!title) title="提示";
+	o.dialog("close");
+	img.attr("src", img.attr("msg-src"))
 	return $("#msg_box_box").dialog({
 				title : title,
 				draggable : false,
@@ -10,8 +14,12 @@ showMsg = function(title, msg) {
 }
 
 showError = function(title, msg) {
-	$("#err_content").html(msg);
-	return $("#error_msg_box").dialog({
+	$("#msg_content").html(msg);
+	if (!title) title="提示";
+	var o =$("#msg_box_box"), img = $("#msg_box_box img");
+	o.dialog("close");
+	img.attr("src", img.attr("err-src"))
+	return o.dialog({
 				title : title,
 				draggable : false,
 				modal : false,
@@ -32,8 +40,12 @@ logout = function (url) {
 }
 AjaxLoader = function() {
 	var _self = this;
+	var o =$("#msg_box_box"), img = $("#msg_box_box img");
+		img.attr("src", img.attr("err-src"))
+		o.html("正在处理，请稍后...");
 	_self.show = function() {
-		$('#ajax_loader').dialog({
+		
+		o.dialog({
 					title : '处理中...',
 					draggable : false,
 					modal : true,
@@ -44,7 +56,7 @@ AjaxLoader = function() {
 		$('.ui-dialog-titlebar-close').hide();
 	}
 	_self.hide = function() {
-		$('#ajax_loader').dialog('close');
+		o.dialog('close');
 		$('.ui-dialog-titlebar-close').show();
 	}
 
@@ -59,6 +71,7 @@ var EDITOR_ITEMS = [
         			'forecolor', 'hilitecolor', 'bold','italic', 'underline', 'strikethrough', 'lineheight', 
         			'removeformat', '|', 'image','table', 'hr', 'link', 'unlink'];
 var ajaxLoader = new AjaxLoader();
+
 function ajaxForm(formName, callback, presubmit) {
 	if (undefined == callback)	callback = function() {};
 	if (undefined == presubmit)	presubmit = function() {};
@@ -82,10 +95,9 @@ function ajaxForm(formName, callback, presubmit) {
 
 // ajax默认回调函数
 function ajaxCall(ret) {
-	if (ret == '')
-		return false;
+	if (ret == '') return false;
 	ret = ('object' == typeof(ret)) ? ret : eval('(' + ret + ')');
-	if (ret.success) {
+	if (ret.success==0) {
 		showMsg('', ret.msg);
 	} else {
 		showError('', ret.msg);
@@ -94,10 +106,9 @@ function ajaxCall(ret) {
 
 // ajax跳转
 function ajaxRedirect(ret, url) {
-	if (ret == '')
-		return false;
+	if (ret == '') return false;
 	if (ret) {
-		if (ret.success) {
+		if (ret.success==0) {
 			showMsg('', ret.msg);
 			setTimeout(function() {
 						location.href = url;
@@ -119,7 +130,7 @@ function deleteOne(url, msg, e) {
 							dataType : 'json',
 							data : 'token='+token,
 							success : function(ret) {
-								if (ret.success) {
+								if (ret.success==0) {
 									showMsg('', ret.msg);
 									setTimeout(function() {
 												location.reload();

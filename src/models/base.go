@@ -3,9 +3,9 @@ package models
 import (
 	"fmt"
 	db "libs/db"
-	utils "libs/utils"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 )
 
@@ -51,13 +51,13 @@ func (model *Model) GroupBy(groupby string) {
 }
 
 //select query
-func (model *Model) Gets() (results []map[string][]byte, err error) {
+func (model *Model) Gets() (results []map[string]interface{}, err error) {
 	query := fmt.Sprintf("SELECT * FROM %s%s%s%s", model.GetTable(), model.where, model.orderby, model.limit)
 	results, err = model.Db().FetchAll(query, model.args...)
 	return results, err
 }
 
-func (model *Model) Get() (result map[string][]byte, err error) {
+func (model *Model) Get() (result map[string]interface{}, err error) {
 	query := fmt.Sprintf("SELECT * FROM %s%s%s", model.GetTable(), model.where, model.orderby)
 	result, err = model.Db().Fetch(query, model.args...)
 	return result, err
@@ -83,13 +83,27 @@ func (model *Model) SetData(data map[string]interface{}) *Model {
 	return model
 }
 
-func (model *Model) GetData(field string) ([]byte, int64) {
-	return utils.IValue(model.Data[field])
+func (model *Model) GetData(field string) (interface{}, int) {
+	if model.Data[field] != nil {
+		return model.Data[field], reflect.ValueOf(model.Data[field]).Len()
+	}
+	return nil, 0
+}
+
+//insert data 
+func (model *Model) Insert() (int64, error) {
+	str, args := model.CookMap(model.Data, " =?, ", ", ")
+	query := fmt.Sprintf("INSERT INTO %s SET %s", model.GetTable(), str)
+	result, err := model.Db().Execute(query, args...)
+	if err != nil {
+		return 0, err
+	}
+	return result, err
 }
 
 //update 
 func (model *Model) Update() (int64, error) {
-	str, args := model.CookMap(model.Data, " =?, ")
+	str, args := model.CookMap(model.Data, " =?, ", ", ")
 	query := fmt.Sprintf("UPDATE %s SET %s", model.GetTable(), str)
 	result, err := model.Db().Execute(query, args...)
 	if err != nil {
@@ -100,7 +114,7 @@ func (model *Model) Update() (int64, error) {
 
 //delete 
 func (model *Model) Delete() (int64, error) {
-	query := fmt.Sprintf("DELETE FROM %s WHERE %s", model.GetTable(), model.where)
+	query := fmt.Sprintf("DELETE FROM %s %s", model.GetTable(), model.where)
 	result, err := model.Db().Execute(query, model.args...)
 	if err != nil {
 		return 0, err
@@ -108,14 +122,14 @@ func (model *Model) Delete() (int64, error) {
 	return result, nil
 }
 
-func (base *Model) CookMap(data map[string]interface{}, sep string) (string, []interface{}) {
+func (base *Model) CookMap(data map[string]interface{}, sep string, cutset string) (string, []interface{}) {
 	var fields []string
 	var values []interface{}
 	for field, value := range data {
 		fields = append(fields, field)
 		values = append(values, value)
 	}
-	return strings.Join(fields, sep) + sep, values
+	return strings.Trim(strings.Join(fields, sep)+sep, cutset), values
 }
 
 func (model *Model) GetTable() string {

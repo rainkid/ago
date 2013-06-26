@@ -30,50 +30,50 @@ func (u *User) Login() (int64, string) {
 		return u.code + 2, ""
 	}
 
-	result, err := u.Where("username =? ", string(username)).Get()
+	result, err := u.Where("username =? ", utils.ItoString(username)).Get()
 	if err != nil {
 		return u.code + 3, ""
 	}
 
-	temp := utils.MD5(string(password))
-	t := utils.MD5(fmt.Sprintf("%x", temp) + string(result["hash"]))
+	temp := utils.MD5(utils.ItoString(password))
+	t := utils.MD5(fmt.Sprintf("%x", temp) + fmt.Sprintf("%s", result["hash"]))
 
-	if !bytes.Equal([]byte(string(fmt.Sprintf("%x", t))), result["password"]) {
+	if !bytes.Equal([]byte(string(fmt.Sprintf("%x", t))), utils.ItoByte(result["password"])) {
 		return u.code + 4, ""
 	}
 
-	str := fmt.Sprintf("%s|%s|%s", string(result["uid"]), string(result["username"]), string(result["hash"]))
+	str := fmt.Sprintf("%d|%s|%s", result["uid"], result["username"], result["hash"])
 	cstr, err := utils.Encrypt(str, u.hash)
 
 	if err != nil {
 		return u.code, ""
 	}
 	return 0, cstr
-
 }
 
-func (u *User) IsLogin(str string) bool {
+func (u *User) IsLogin(str string) (bool, map[string]interface{}) {
 	if str == "" {
-		return false
+		return false, nil
 	}
 	destr, err := utils.Decrypt(str, u.hash)
 	if destr == "" || err != nil {
-		return false
+		return false, nil
 	}
 
 	info := strings.Split(destr, "|")
 	if len(info) != 3 {
-		return false
+		return false, nil
 	}
 	result, err := u.Where("uid = ? AND username = ?", info[0], info[1]).Get()
 
 	if err != nil {
-		return false
+		return false, nil
 	}
-	if !bytes.Equal(result["hash"], []byte(info[2])) {
-		return false
+
+	if !bytes.Equal(utils.ItoByte(result["hash"]), []byte(info[2])) {
+		return false, nil
 	}
-	return true
+	return true, result
 }
 
 func (u *User) Valid() (int64, string) {
