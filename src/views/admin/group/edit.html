@@ -1,0 +1,81 @@
+{{define "content"}}
+{{template "header"}}
+<div class="wrap"><div class="nav">
+	<ul class="cc">
+        <li><a href="/admin/group/index">用户组列表</a></li>
+		<li class="current"><a href="/admin/group/add">编辑用户组</a></li>
+	</ul>
+</div>
+<div class="h_a">添加用户组</div>
+<form method="post" action="/admin/group/edit_post" id='groupForm'>
+<input name="token" value="{{.token}}" type="hidden" />
+<input name="id" value="{{.agroup.groupid}}" type="hidden" />
+<div class="table_full">
+    <table width="100%">
+        <tr class="tr">
+            <th class="th">用户组名称</th>
+            <td class="td"><input type="text" maxlength="30" name="name" class="input" value="{{.agroup.name|buffer}}"></td>
+        </tr>
+        <tr class="tr">
+            <th class="th">用户组描述</th>
+            <td class="td"><textarea class="textarea" name="descrip">{{.agroup.descrip|buffer}}</textarea></td>
+        </tr>
+        <tr class="tr">
+            <th class="th">权限分配</th>
+            <td class="td">
+                <dl class="cc purview_list">
+                    {{range .menus}}
+                    <dt>
+                        <label>
+                            <input name="" onClick="checkSome('{{.ID}}');" type="checkbox" />
+                            {{.Name}}
+                        </label>
+                    </dt>
+
+                    <dd class="{{.ID}}">
+                        {{range .Items}}
+                            {{if .Items}}
+                                {{range .Items}}
+                                <label>
+                                    <input name="rvalue" type="checkbox" value="{{.ID}}"/>{{.Name}}
+                                </label>
+                                {{end}}
+                            {{else}}
+                            <label>
+                                <input name="rvalue" type="checkbox" value="{{.ID}}"/>{{.Name}}
+                            </label>
+                            {{end}}
+                        {{end}}
+                    </dd>
+                    {{end}}
+                </dl>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="mb10 tac"><span class="btn"><span><button onfocus="blur();" type="submit">保存</button></span></span></div>
+</form>
+<script type="text/javascript">
+    
+    //权限选中大类的时候同时选中小类
+    function checkSome(val) {
+        $("."+val).find("input").each(function(){
+            $(this).attr('checked',!$(this).attr('checked'));
+        })
+    }
+
+    $(document).ready(function(){
+        ajaxForm('groupForm',function(ret){
+            ajaxRedirect(ret, baseurl+'/admin/group/index');
+        });
+
+        var chks = "{{.agroup.rvalue|buffer}}".split(",");
+        for (var i = chks.length - 1; i >= 0; i--) {
+            $("input[value="+chks[i]+"]").attr('checked', 'checked')
+        };
+    })
+    
+</script>
+</div>
+{{template "footer"}}
+{{end}}

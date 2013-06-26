@@ -1,0 +1,31 @@
+{{define "content"}}
+{{template "header"}}
+<div class="wrap"><div class="nav">
+	<ul class="cc">
+    <li class="current"><a href="/admin/group/index">用户组列表</a></li>
+		<li><a href="/admin/group/add">添加用户组</a></li>
+	</ul>
+</div>
+<div class="table_list">
+	<table width="100%">
+		<tr class="hd">
+			<td width="60">用户组ID</td>
+			<td>用户组名称</td>
+			<td>描述</td>
+			<td>操作</td>
+		</tr>
+		{{range .groups}}
+		<tr class="ct">
+			<td>{{printf "%s" .groupid}}</td>
+			<td>{{printf "%s" .name}}</td>
+			<td>{{printf "%s" .descrip}}</td>
+			<td><a href="/admin/group/edit?id={{.groupid|buffer}}" class="mr10">编辑</a><a onclick="deleteOne('/admin/group/delete?id={{.groupid|buffer}}', '是否要删除该用户组？', event);" href='javascript:'>删除</a></td>
+		</tr>
+		{{end}}
+	</table>
+</div>
+<div class="mr10 cc">
+</div>
+</div>
+{{template "footer"}}
+{{end}}
