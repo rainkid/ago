@@ -1,6 +1,8 @@
+sh mkroute.sh 
+cp  /home/rainkid/ago/src/github.com/rainkid/dogo/* /home/rainkid/dogo/
 export GOPATH=/home/rainkid/ago
-cd /home/rainkid/ago/src/github.com/rainkid/dogo
-sh build.sh
+sh /home/rainkid/ago/src/github.com/rainkid/dogo/build.sh
 
-cd /home/rainkid/ago
+export GOPATH=$PWD
+cd $GOPATH
 go build && ./ago
