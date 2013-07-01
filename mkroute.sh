@@ -29,6 +29,7 @@ buidmodules () {
 }
 
 buidmodules
+touch routers.go
 echo 'package main\n
 import ('$import_str')\n
 func AddSampleRoute(router *dogo.Router) {\n
