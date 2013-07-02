@@ -22,7 +22,7 @@ buidmodules () {
 				count=`ls $dir|wc -l`
 				if [ 0 -ne $count ]; then
 					module=`echo $(basename "$dir")`
-					import_str=$import_str$module' "modules/'$module'"'
+					import_str=$import_str$module' "modules/'$module'"\n'
 				fi
 			fi
 	    done

@@ -8,8 +8,8 @@ import (
 
 func main() {
 	router := getRouter()
-	// bootstrap and return a app
 
+	// bootstrap and return a app
 	basepath, _ := os.Getwd()
 	file := path.Join(basepath, "src/configs", "app.ini")
 	app := dogo.NewApp(file)
