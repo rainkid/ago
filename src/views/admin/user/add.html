@@ -1,0 +1,56 @@
+{{define "content"}}
+{{template "header"}}
+<div class="wrap"><div class="nav">
+	<ul class="cc">
+    <li><a href="/admin/user/index">用户列表</a></li>
+    <li class="current"><a href="javascript:;">添加用户</a></li>
+	</ul>
+</div>
+<div class="h_a">编辑用户</div>
+<form method="post" action="/Admin/User/add_post" id="addUserFrom">
+    <input name="token" value="{{.token}}" type="hidden" />
+<div class="table_full">
+	<table width="100%">
+		<tr class="tr">
+			<th class="th">用户名</th>
+			<td class="td">
+				<input type="text" class="input" name="username">
+			</td>
+		</tr>
+		<tr class="tr">
+			<th class="th">用户Email</th>
+			<td class="td"><input type="text" name="email" class="input"></td>
+		</tr>
+		<tr class="tr">
+			<th class="th">用户密码</th>
+			<td class="td"><input type="password" name="password" class="input"></td>
+		</tr>
+		<tr class="tr">
+			<th class="th">重复密码</th>
+			<td class="td"><input type="password" name="r_password" class="input"></td>
+		</tr>
+		<tr class="tr">
+			<th class="th">用户组</th>
+			<td class="td">
+ 			<select name="groupid">
+				{{range .groups}}
+				<option value="2">{{.name|buffer}}</option>
+				{{end}}
+			</select> 				
+            </td>
+		</tr>
+	</table>
+</div>
+<div class="mb10 tac"><span class="btn"><span><button onfocus="blur();" type="submit">保存</button></span></span></div>
+</form>
+<script type="text/javascript">
+//用户表单数据提交
+$(document).ready(function(){
+	ajaxForm('addUserFrom',function(ret){
+		ajaxRedirect(ret, baseurl+'/admin/user/index');
+	});
+})
+</script>
+</div>
+{{template "footer"}}
+{{end}}

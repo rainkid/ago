@@ -11,6 +11,7 @@
 		<tr class="hd">
 			<td width="60">UID</td>
 			<td>用户名</td>
+			<td>邮箱</td>
 			<td>用户组</td>
 			<td>注册时间</td>
 			<td>注册IP</td>
@@ -20,12 +21,12 @@
 		<tr class="ct">
 			<td>1</td>
 			<td>{{printf "%s" .username}}</td>
-			<td>超级管理员</td>
+			<td>{{printf "%s" .email}}</td>
+			<td>{{printf "%s" .groupname}}</td>
             <td>{{printf "%s" .registertime}}</td>
 			<td>{{printf "%s" .registerip}}</td>
 			<td>
-			<a href="/admin/user/edit?id={{.uid|buffer}}" class="mr10">编辑</a>
-						</td>
+			<a href="/admin/user/edit?id={{.uid|buffer}}" class="mr10">编辑</a><a onclick="deleteOne('/admin/user/delete?id={{.uid|buffer}}', '是否要删除该用户？', event);" href='javascript:'>删除</a></td>
 		</tr>
 		{{end}}
 		

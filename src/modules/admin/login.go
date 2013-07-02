@@ -19,7 +19,7 @@ func (c *Login) Login() {
 	user := models.NewUserModel()
 	user.SetData(values)
 
-	if code, _ := user.Valid(); code != 0 {
+	if code, _ := user.LoginValid(); code != 0 {
 		c.Redirect(fmt.Sprintf("/admin/errors/index?code=%d", code), nil)
 	}
 

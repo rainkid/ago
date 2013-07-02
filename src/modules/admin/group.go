@@ -74,7 +74,7 @@ func (c *Group) Delete() {
 	affect, err := mgroup.Where("groupid = ?", id).Delete()
 	if err != nil {
 		c.Json(-1, "操作失败", nil)
+		return
 	}
 	c.Json(0, "操作成功", affect)
-	return
 }

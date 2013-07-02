@@ -42,7 +42,7 @@ func (c *AdminBase) CheckLogin() {
 	user := models.NewUserModel()
 	cookieStr := c.GetCookie("Admin_User")
 
-	flag, info := user.IsLogin(cookieStr)
+	flag, info := user.WithCookie(cookieStr).IsLogin()
 	if !flag {
 		c.Redirect("/admin/login/index", nil)
 	}

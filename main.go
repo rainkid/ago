@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/rainkid/dogo"
-	admin "modules/admin"
 	"os"
 	"path"
 )
@@ -12,7 +11,7 @@ func main() {
 	// bootstrap and return a app
 
 	basepath, _ := os.Getwd()
-	file := path.Join(basepath, "src/configs", "app.yaml")
+	file := path.Join(basepath, "src/configs", "app.ini")
 	app := dogo.NewApp(file)
 
 	//bootstart and run
@@ -28,12 +27,7 @@ func getRouter() *dogo.Router {
 	router.AddStaticRoute("/statics", path.Join(basepath, "src/statics/"))
 
 	//add sample route
-	router.AddSampleRoute("admin", &admin.Errors{})
-	router.AddSampleRoute("admin", &admin.Login{})
-	router.AddSampleRoute("admin", &admin.Index{})
-
-	router.AddSampleRoute("admin", &admin.User{})
-	router.AddSampleRoute("admin", &admin.Group{})
+	AddSampleRoute(router)
 
 	//add regex router and default is sample route
 	router.AddRegexRoute("/login", "/admin/login/index")

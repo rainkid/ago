@@ -1,27 +1,31 @@
 package utils
 
 import (
+	"bytes"
 	"crypto/md5"
 	"fmt"
 	"github.com/rainkid/dogo"
 	"io"
+	"math/rand"
 	"reflect"
+	"strconv"
+	"time"
 )
 
 func GetConfig(filename string, name string) string {
-	config, err := dogo.NewConfig(fmt.Sprintf("src/configs/%s.yaml", filename))
+	config, err := dogo.NewConfig(fmt.Sprintf("src/configs/%s.ini", filename))
 	if err != nil {
 		return ""
 	}
-	str, err := config.String(ENV(), name)
+	str, err := config.String(Env(), name)
 	if err != nil {
 		return ""
 	}
 	return str
 }
 
-func ENV() string {
-	config, err := dogo.NewConfig("src/configs/app.yaml")
+func Env() string {
+	config, err := dogo.NewConfig("src/configs/app.ini")
 	if err != nil {
 		return "product"
 	}
@@ -39,15 +43,29 @@ func MD5(str string) []byte {
 }
 
 func ItoByte(i interface{}) []byte {
-	return []byte(fmt.Sprintf("%s", i))
+	return []byte(ItoString(i))
 }
 
 func ItoString(i interface{}) string {
-	return reflect.ValueOf(i).Index(0).String()
+	rt := reflect.TypeOf(i)
+	switch rt.Kind() {
+	case reflect.String:
+		return reflect.ValueOf(i).Index(0).String()
+	case reflect.Slice:
+		switch rt.Elem().Kind() {
+		case reflect.String:
+			return reflect.ValueOf(i).Index(0).String()
+		case reflect.Uint8:
+			return fmt.Sprintf("%s", i)
+		}
+		return fmt.Sprintf("%s", i)
+	}
+	return fmt.Sprintf("%s", i)
 }
 
-func ItoUint(i interface{}) uint64 {
-	return reflect.ValueOf(i).Uint()
+func ItoInt(i interface{}) int64 {
+	ret, _ := strconv.Atoi(ItoString(i))
+	return int64(ret)
 }
 
 func ItoStrings(i interface{}) []string {
@@ -58,6 +76,24 @@ func ItoStrings(i interface{}) []string {
 		strs = append(strs, reflect.ValueOf(i).Index(j).String())
 	}
 	return strs
+}
+
+func RandString(len int) string {
+	var result bytes.Buffer
+	var temp string
+	for i := 0; i < len; {
+		if string(RandInt(65, 90)) != temp {
+			temp = string(RandInt(65, 90))
+			result.WriteString(temp)
+			i++
+		}
+	}
+	return result.String()
+}
+
+func RandInt(min int, max int) int {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return min + rand.Intn(max-min)
 }
 
 /*func IValue(i interface{}) (value []byte, length int64) {

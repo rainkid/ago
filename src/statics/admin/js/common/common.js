@@ -2,7 +2,6 @@
 showMsg = function(title, msg) {
 	$("#msg_content").html(msg);
 	var o =$("#msg_box_box"), img = $("#msg_box_box img");
-	if (!title) title="提示";
 	o.dialog("close");
 	img.attr("src", img.attr("msg-src"))
 	return $("#msg_box_box").dialog({
@@ -15,7 +14,6 @@ showMsg = function(title, msg) {
 
 showError = function(title, msg) {
 	$("#msg_content").html(msg);
-	if (!title) title="提示";
 	var o =$("#msg_box_box"), img = $("#msg_box_box img");
 	o.dialog("close");
 	img.attr("src", img.attr("err-src"))
@@ -98,9 +96,9 @@ function ajaxCall(ret) {
 	if (ret == '') return false;
 	ret = ('object' == typeof(ret)) ? ret : eval('(' + ret + ')');
 	if (ret.success==0) {
-		showMsg('', ret.msg);
+		showMsg('提示', ret.msg);
 	} else {
-		showError('', ret.msg);
+		showError('提示', ret.msg);
 	}
 }
 
@@ -109,12 +107,12 @@ function ajaxRedirect(ret, url) {
 	if (ret == '') return false;
 	if (ret) {
 		if (ret.success==0) {
-			showMsg('', ret.msg);
+			showMsg('提示', ret.msg);
 			setTimeout(function() {
 						location.href = url;
 					}, 500);
 		} else {
-			showError('', ret.msg);
+			showError('提示', ret.msg);
 		}
 	}
 }

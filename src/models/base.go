@@ -27,8 +27,9 @@ func NewModel(tableName, primaryKey string) *Model {
 }
 
 //params
-func (model *Model) Wherep(id int) {
-	model.where = fmt.Sprintf(" WHERE %s = %d ", model.PrimaryKey, id)
+func (model *Model) Wherep(id interface{}) *Model {
+	model.where = fmt.Sprintf(" WHERE %s = %v ", model.PrimaryKey, id)
+	return model
 }
 
 func (model *Model) Where(where string, args ...interface{}) *Model {
@@ -84,7 +85,8 @@ func (model *Model) SetData(data map[string]interface{}) *Model {
 }
 
 func (model *Model) GetData(field string) (interface{}, int) {
-	if model.Data[field] != nil {
+	rt := reflect.ValueOf(model.Data[field])
+	if model.Data[field] != nil && rt.Index(0).Len() > 0 {
 		return model.Data[field], reflect.ValueOf(model.Data[field]).Len()
 	}
 	return nil, 0
@@ -104,7 +106,7 @@ func (model *Model) Insert() (int64, error) {
 //update 
 func (model *Model) Update() (int64, error) {
 	str, args := model.CookMap(model.Data, " =?, ", ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s", model.GetTable(), str)
+	query := fmt.Sprintf("UPDATE %s SET %s%s", model.GetTable(), str, model.where)
 	result, err := model.Db().Execute(query, args...)
 	if err != nil {
 		return 0, err
@@ -122,12 +124,15 @@ func (model *Model) Delete() (int64, error) {
 	return result, nil
 }
 
-func (base *Model) CookMap(data map[string]interface{}, sep string, cutset string) (string, []interface{}) {
+func (model *Model) CookMap(data map[string]interface{}, sep string, cutset string) (string, []interface{}) {
 	var fields []string
 	var values []interface{}
 	for field, value := range data {
 		fields = append(fields, field)
 		values = append(values, value)
+	}
+	for _, arg := range model.args {
+		values = append(values, arg)
 	}
 	return strings.Trim(strings.Join(fields, sep)+sep, cutset), values
 }
@@ -138,6 +143,6 @@ func (model *Model) GetTable() string {
 
 func (model *Model) Db() *db.Mysql {
 	basepath, _ := os.Getwd()
-	file := path.Join(basepath, "src/configs", "mysql.yaml")
+	file := path.Join(basepath, "src/configs", "mysql.ini")
 	return db.NewMysql(file)
 }
