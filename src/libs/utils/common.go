@@ -6,10 +6,17 @@ import (
 	"fmt"
 	"github.com/rainkid/dogo"
 	"io"
+	"log"
 	"math/rand"
+	"os"
 	"reflect"
 	"strconv"
 	"time"
+)
+
+var (
+	loger = log.New(os.Stdout, "[libs] ", log.Ldate|log.Ltime)
+	env   = "product"
 )
 
 func GetConfig(filename string, name string) string {
@@ -27,11 +34,13 @@ func GetConfig(filename string, name string) string {
 func Env() string {
 	config, err := dogo.NewConfig("src/configs/app.ini")
 	if err != nil {
-		return "product"
+		loger.Print(err.Error())
+		return env
 	}
-	env, err := config.String("base", "env")
+	env, err := config.String("base", "environ")
 	if err != nil {
-		return "product"
+		loger.Print(err.Error())
+		return env
 	}
 	return env
 }
