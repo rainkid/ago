@@ -2,9 +2,9 @@ package admin
 
 import (
 	"bytes"
-	"fmt"
 	utils "libs/utils"
 	models "models"
+	"strings"
 	"time"
 )
 
@@ -40,12 +40,22 @@ func (c *User) Add() {
 
 func (c *User) Add_post() {
 	values := c.GetPosts([]string{"username", "email", "password", "r_password", "groupid"})
+	remoteAddr := strings.Split(c.GetRequest().RemoteAddr, ":")
+	values["registerip"] = remoteAddr[0]
+
+	flag, _ := models.NewUserModel().Where("username = ?", utils.ItoString(values["username"])).Gets()
+	if flag != nil {
+		c.Json(-1, "用户已经存在.", nil)
+		return
+	}
+
 	user := models.NewUserModel()
 	user.WithHash(utils.RandString(8)).SetData(values)
 	if code, msg := user.Valid(); code != 0 {
 		c.Json(code, msg, nil)
 		return
 	}
+
 	user.Insert()
 	c.Json(0, "操作成功", nil)
 }
@@ -100,11 +110,13 @@ func (c *User) Passwd_post() {
 		c.Json(-1, msg, nil)
 		return
 	}
-
-	_, info := user.GetLoginUser()
-	fmt.Println(info)
-	data := map[string]interface{}{"password": values["password"]}
-	user.SetData(data).Wherep(info[0]).Update()
+	flag, password := user.Password(utils.ItoString(values["password"]), utils.ItoString(c.UserInfo["hash"]))
+	if !flag {
+		c.Json(-1, "修改失败.", nil)
+		return
+	}
+	data := map[string]interface{}{"password": password}
+	models.NewUserModel().SetData(data).Wherep(c.UserInfo["uid"]).Update()
 	c.Json(0, "修改成功.", nil)
 }
 

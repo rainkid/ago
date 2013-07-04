@@ -5,11 +5,11 @@
 	<table width="100%">
 		<tr class="tr">
 			<th class="th">UID</th>
-			<td class="td">9</td>
+			<td class="td">{{.UserInfo.uid}}</td>
 		</tr>
 		<tr class="tr">
 			<th class="th">用户名</th>
-			<td class="td">testa</td>
+			<td class="td">{{.UserInfo.username|buffer}}</td>
 		</tr>
 	</table>
 </div></div>

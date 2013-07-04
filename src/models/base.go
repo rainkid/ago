@@ -107,6 +107,7 @@ func (model *Model) Insert() (int64, error) {
 func (model *Model) Update() (int64, error) {
 	str, args := model.CookMap(model.Data, " =?, ", ", ")
 	query := fmt.Sprintf("UPDATE %s SET %s%s", model.GetTable(), str, model.where)
+	fmt.Println(query, args)
 	result, err := model.Db().Execute(query, args...)
 	if err != nil {
 		return 0, err

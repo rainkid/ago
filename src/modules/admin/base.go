@@ -15,6 +15,7 @@ import (
 
 type AdminBase struct {
 	dogo.Controller
+	UserInfo map[string]interface{}
 }
 
 func (c *AdminBase) Init() {
@@ -46,6 +47,7 @@ func (c *AdminBase) CheckLogin() {
 	if !flag {
 		c.Redirect("/admin/login/index", nil)
 	}
+	c.UserInfo = info
 	c.Assign("UserInfo", info)
 }
 
