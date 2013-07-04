@@ -104,33 +104,3 @@ func RandInt(min int, max int) int {
 	rand.Seed(time.Now().UTC().UnixNano())
 	return min + rand.Intn(max-min)
 }
-
-/*func IValue(i interface{}) (value []byte, length int64) {
-	if i != nil {
-		rt := reflect.TypeOf(i)
-		rv := reflect.ValueOf(i)
-		switch rt.Kind() {
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			value = []byte(strconv.FormatInt(rv.Int(), 10))
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-			value = []byte(strconv.FormatUint(rv.Uint(), 10))
-		case reflect.Float32:
-		case reflect.Float64:
-			value = []byte(strconv.FormatFloat(rv.Float(), 'f', -1, 64))
-		case reflect.Slice, reflect.Array:
-			switch rt.Elem().Kind() {
-			case reflect.Uint8:
-				value = rv.Interface().([]byte)
-			case reflect.String:
-				value = []byte(reflect.ValueOf(rv.Interface()).Index(0).String())
-			default:
-				value = nil
-			}
-		case reflect.String:
-			value = []byte(rv.String())
-		default:
-			value = nil
-		}
-	}
-	return value, int64(len(value))
-}*/
