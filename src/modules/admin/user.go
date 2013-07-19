@@ -2,6 +2,7 @@ package admin
 
 import (
 	"bytes"
+	// "fmt"
 	utils "libs/utils"
 	models "models"
 	"strings"
@@ -43,8 +44,8 @@ func (c *User) Add_post() {
 	remoteAddr := strings.Split(c.GetRequest().RemoteAddr, ":")
 	values["registerip"] = remoteAddr[0]
 
-	flag, _ := models.NewUserModel().Where("username = ?", utils.ItoString(values["username"])).Gets()
-	if flag != nil {
+	result, _ := models.NewUserModel().Where("username = ?", values["username"]).Get()
+	if result["username"] != nil {
 		c.Json(-1, "用户已经存在.", nil)
 		return
 	}
@@ -102,21 +103,20 @@ func (c *User) Delete() {
 
 func (c *User) Passwd_post() {
 	values := c.GetInputs([]string{"current_password", "password", "r_password"})
-	cookieStr := c.GetCookie("Admin_User")
 
-	user := models.NewUserModel().WithCookie(cookieStr)
-	flag, msg := user.CheckPasswd(utils.ItoString(values["current_password"]))
+	user := models.NewUserModel()
+	flag, msg := user.CheckPasswd(values["current_password"])
 	if !flag {
 		c.Json(-1, msg, nil)
 		return
 	}
-	flag, password := user.Password(utils.ItoString(values["password"]), utils.ItoString(c.UserInfo["hash"]))
+	flag, password := user.Password(values["password"], utils.ItoString(c.UserInfo["hash"]))
 	if !flag {
 		c.Json(-1, "修改失败.", nil)
 		return
 	}
-	data := map[string]interface{}{"password": password}
-	models.NewUserModel().SetData(data).Wherep(c.UserInfo["uid"]).Update()
+	data := map[string]string{"password": password}
+	user.SetData(data).Wherep(c.UserInfo["uid"]).Update()
 	c.Json(0, "修改成功.", nil)
 }
 

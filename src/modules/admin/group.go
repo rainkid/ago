@@ -4,6 +4,7 @@ import (
 	"fmt"
 	admin "libs/admin"
 	models "models"
+	"strings"
 )
 
 type Group struct {
@@ -24,7 +25,8 @@ func (c *Group) Add() {
 }
 
 func (c *Group) Add_post() {
-	values := c.GetInputs([]string{"rvalue", "name", "descrip"})
+	values := c.GetInputs([]string{"name", "descrip"})
+	values["rvalue"] = strings.Join(c.GetInputList("rvalue"), ",")
 	mgroup := models.NewGroupModel()
 	mgroup.SetData(values)
 
@@ -51,7 +53,8 @@ func (c *Group) Edit() {
 
 func (c *Group) Edit_post() {
 	id := c.GetInput("id")
-	values := c.GetInputs([]string{"rvalue", "name", "descrip"})
+	values := c.GetInputs([]string{"name", "descrip"})
+	values["rvalue"] = strings.Join(c.GetInputList("rvalue"), ",")
 	mgroup := models.NewGroupModel()
 	mgroup.SetData(values)
 

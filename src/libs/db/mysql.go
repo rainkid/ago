@@ -5,8 +5,12 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	utils "libs/utils"
+	"log"
+	"os"
 	"reflect"
 )
+
+var loger = log.New(os.Stdout, "[mysql] ", log.Ldate|log.Ltime)
 
 //mysql
 type Mysql struct {
@@ -22,12 +26,14 @@ func (m *Mysql) FetchAll(query string, args ...interface{}) (results []map[strin
 	dsn := m.DSN()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
+		loger.Print(err.Error())
 		return nil, err
 	}
 	defer db.Close()
 
 	rows, err := db.Query(query, args...)
 	if err != nil {
+		loger.Print(err.Error())
 		return nil, err
 	}
 
@@ -39,6 +45,7 @@ func (m *Mysql) FetchAll(query string, args ...interface{}) (results []map[strin
 	}
 	err = rows.Err()
 	if err != nil {
+		loger.Print(err.Error())
 		return nil, err
 	}
 	return results, nil
@@ -49,21 +56,25 @@ func (m *Mysql) Fetch(query string, args ...interface{}) (results map[string]int
 	dsn := m.DSN()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
+		loger.Print(err.Error())
 		return nil, err
 	}
 	defer db.Close()
 
 	rows, err := db.Query(query, args...)
 	if err != nil {
+		loger.Print(err.Error())
 		return nil, err
 	}
 
 	if !rows.Next() {
+		loger.Print(rows.Err())
 		return nil, rows.Err()
 	}
 
 	result, err := m.RowsToMap(rows)
 	if err != nil {
+		loger.Print(err.Error())
 		return nil, err
 	}
 	return result, nil
@@ -73,6 +84,7 @@ func (m *Mysql) FetchRow(query string, args ...interface{}) (*sql.Row, error) {
 	dsn := m.DSN()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
+		loger.Print(err.Error())
 		return nil, err
 	}
 	defer db.Close()
@@ -86,16 +98,19 @@ func (m *Mysql) Execute(query string, args ...interface{}) (int64, error) {
 	dsn := m.DSN()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
+		loger.Print(err.Error())
 		return 0, err
 	}
 	defer db.Close()
 
 	stmt, err := db.Prepare(query)
 	if err != nil {
+		loger.Print(err.Error())
 		return 0, err
 	}
 	res, err := stmt.Exec(args...)
 	if err != nil {
+		loger.Print(err.Error())
 		return 0, err
 	}
 	id, err := res.LastInsertId()
@@ -111,6 +126,7 @@ func (m *Mysql) RowsToMap(rows *sql.Rows) (map[string]interface{}, error) {
 
 	fields, err := rows.Columns()
 	if err != nil {
+		loger.Print(err.Error())
 		return nil, err
 	}
 

@@ -1,11 +1,5 @@
 package models
 
-import (
-	// "fmt"
-	utils "libs/utils"
-	"strings"
-)
-
 type Group struct {
 	Model
 	code int64
@@ -35,9 +29,9 @@ func (g *Group) Valid() (int64, string) {
 		return g.code + 3, "请选择至少一个权限."
 	}
 
-	g.Data["name"] = utils.ItoString(name)
-	g.Data["descrip"] = utils.ItoString(descrip)
-	g.Data["rvalue"] = strings.Join(utils.ItoStrings(rvalue), ",")
+	g.Data["name"] = name
+	g.Data["descrip"] = descrip
+	g.Data["rvalue"] = rvalue
 
 	return 0, ""
 }

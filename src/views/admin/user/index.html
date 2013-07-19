@@ -19,7 +19,7 @@
 		</tr>
 		{{range .users}}
 		<tr class="ct">
-			<td>1</td>
+			<td>{{printf "%s" .uid}}</td>
 			<td>{{printf "%s" .username}}</td>
 			<td>{{printf "%s" .email}}</td>
 			<td>{{printf "%s" .groupname}}</td>

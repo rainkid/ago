@@ -3,6 +3,7 @@ package models
 import (
 	"bytes"
 	"fmt"
+	"github.com/rainkid/dogo"
 	utils "libs/utils"
 	"strings"
 )
@@ -12,8 +13,6 @@ type User struct {
 
 	hash string
 	code int64
-
-	cookieStr string
 }
 
 func NewUserModel() *User {
@@ -22,11 +21,6 @@ func NewUserModel() *User {
 		hash:  "A#a&(_=)",
 		code:  1000,
 	}
-}
-
-func (u *User) WithCookie(cookieStr string) *User {
-	u.cookieStr = cookieStr
-	return u
 }
 
 func (u *User) WithHash(hash string) *User {
@@ -42,12 +36,12 @@ func (u *User) Login() (int64, string) {
 		return u.code + 2, ""
 	}
 
-	result, err := u.Where("username =? ", utils.ItoString(username)).Get()
+	result, err := u.Where("username =? ", username).Get()
 	if err != nil {
 		return u.code + 3, ""
 	}
 
-	flag, s := u.Password(utils.ItoString(password), fmt.Sprintf("%s", result["hash"]))
+	flag, s := u.Password(password, fmt.Sprintf("%s", result["hash"]))
 	if !flag {
 		return u.code + 3, ""
 	}
@@ -97,10 +91,11 @@ func (u *User) Password(password, hash string) (bool, string) {
 }
 
 func (u *User) GetLoginUser() (bool, []string) {
-	if u.cookieStr == "" {
+	cookieStr := fmt.Sprintf("%s", dogo.Register.Get("Admin_User_Cookie"))
+	if cookieStr == "" {
 		return false, nil
 	}
-	destr, err := utils.Decrypt(u.cookieStr, u.hash)
+	destr, err := utils.Decrypt(cookieStr, u.hash)
 	if destr == "" || err != nil {
 		return false, nil
 	}
@@ -137,7 +132,7 @@ func (u *User) Valid() (int64, string) {
 	groupid, _ := u.GetData("groupid")
 	r_password, rplen := u.GetData("r_password")
 
-	if username != nil && ulen == 0 {
+	if username != "" && ulen == 0 {
 		return -1, "用户不能为空."
 	}
 	if elen == 0 {
@@ -153,22 +148,22 @@ func (u *User) Valid() (int64, string) {
 	}
 	delete(u.Data, "r_password")
 
-	if username != nil {
-		u.Data["username"] = utils.ItoString(u.Data["username"])
+	if username != "" {
+		u.Data["username"] = u.Data["username"]
 	}
-	if password != nil {
+	if password != "" {
 		u.Data["hash"] = u.hash
-		flag, password := u.Password(utils.ItoString(u.Data["password"]), u.hash)
+		flag, password := u.Password(u.Data["password"], u.hash)
 		if !flag {
 			return -1, "密码操作失败."
 		}
 		u.Data["password"] = password
 	}
-	if email != nil {
-		u.Data["email"] = utils.ItoString(u.Data["email"])
+	if email != "" {
+		u.Data["email"] = u.Data["email"]
 	}
-	if groupid != nil {
-		u.Data["groupid"] = utils.ItoString(u.Data["groupid"])
+	if groupid != "" {
+		u.Data["groupid"] = u.Data["groupid"]
 	}
 
 	return 0, ""

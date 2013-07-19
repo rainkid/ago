@@ -42,8 +42,9 @@ func (c *AdminBase) Init() {
 func (c *AdminBase) CheckLogin() {
 	user := models.NewUserModel()
 	cookieStr := c.GetCookie("Admin_User")
+	dogo.Register.Set("Admin_User_Cookie", cookieStr)
 
-	flag, info := user.WithCookie(cookieStr).IsLogin()
+	flag, info := user.IsLogin()
 	if !flag {
 		c.Redirect("/admin/login/index", nil)
 	}
