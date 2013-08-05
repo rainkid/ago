@@ -31,11 +31,9 @@ func (c *Login) Login() {
 	}
 	c.SetCookie("Admin_User", msg, 60*60*24)
 	c.Redirect("/admin/index/index", nil)
-	return
 }
 
 func (c *Login) Logout() {
 	c.DelCookie("Admin_User")
 	c.Redirect("/admin/index/index", nil)
-	return
 }
