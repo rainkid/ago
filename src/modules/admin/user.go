@@ -2,7 +2,7 @@ package admin
 
 import (
 	"bytes"
-	// "fmt"
+    // "fmt"
 	utils "libs/utils"
 	models "models"
 	"strings"
@@ -44,6 +44,7 @@ func (c *User) Add_post() {
 	remoteAddr := strings.Split(c.GetRequest().RemoteAddr, ":")
 	values["registerip"] = remoteAddr[0]
 
+
 	result, _ := models.NewUserModel().Where("username = ?", values["username"]).Get()
 	if result["username"] != nil {
 		c.Json(-1, "用户已经存在.", nil)
@@ -51,7 +52,7 @@ func (c *User) Add_post() {
 	}
 
 	user := models.NewUserModel()
-	user.WithHash(utils.RandString(8)).SetData(values)
+	user.SetData(values)
 	if code, msg := user.Valid(); code != 0 {
 		c.Json(code, msg, nil)
 		return
@@ -64,6 +65,7 @@ func (c *User) Add_post() {
 func (c *User) Edit() {
 	id := c.GetInput("id")
 	user := models.NewUserModel()
+
 	auser, err := user.Wherep(id).Get()
 	if err == nil {
 		c.Assign("auser", auser)

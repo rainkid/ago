@@ -7,8 +7,8 @@
 	</ul>
 </div>
 <div class="h_a">编辑用户</div>
-<form method="post" action="/Admin/User/edit_post" id="editUserFrom">
-    <input name="id" value="{{.auser.uid}}" type="hidden"/>
+<form method="post" action="/admin/user/edit_post" id="editUserFrom">
+    <input name="id" value="{{.auser.uid|buffer}}" type="hidden"/>
     <input name="token" value="e70197bd" type="hidden" />
 <div class="table_full">
 	<table width="100%">
@@ -34,7 +34,7 @@
  			{{if .auser.groupid}}
 	 			<select name="groupid">
 					{{range .groups}}
-					<option value="2">{{.name|buffer}}</option>
+					<option value="{{.groupid|buffer}}">{{.name|buffer}}</option>
 					{{end}}
 				</select> 				
  			{{else}}

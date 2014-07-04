@@ -18,14 +18,8 @@ type User struct {
 func NewUserModel() *User {
 	return &User{
 		Model: Model{TableName: "admin_user", PrimaryKey: "uid"},
-		hash:  "A#a&(_=)",
 		code:  1000,
 	}
-}
-
-func (u *User) WithHash(hash string) *User {
-	u.hash = hash
-	return u
 }
 
 func (u *User) Login() (int64, string) {
@@ -51,7 +45,7 @@ func (u *User) Login() (int64, string) {
 	}
 
 	str := fmt.Sprintf("%d|%s|%s", result["uid"], result["username"], result["hash"])
-	cstr, err := utils.Encrypt(str, u.hash)
+	cstr, err := utils.Encrypt(str, "12345678")
 
 	if err != nil {
 		return u.code, ""
@@ -95,7 +89,7 @@ func (u *User) GetLoginUser() (bool, []string) {
 	if cookieStr == "" {
 		return false, nil
 	}
-	destr, err := utils.Decrypt(cookieStr, u.hash)
+	destr, err := utils.Decrypt(cookieStr, "12345678")
 	if destr == "" || err != nil {
 		return false, nil
 	}
@@ -131,6 +125,7 @@ func (u *User) Valid() (int64, string) {
 	email, elen := u.GetData("email")
 	groupid, _ := u.GetData("groupid")
 	r_password, rplen := u.GetData("r_password")
+	hash := utils.RandString(8)
 
 	if username != "" && ulen == 0 {
 		return -1, "用户不能为空."
@@ -152,8 +147,8 @@ func (u *User) Valid() (int64, string) {
 		u.Data["username"] = u.Data["username"]
 	}
 	if password != "" {
-		u.Data["hash"] = u.hash
-		flag, password := u.Password(u.Data["password"], u.hash)
+		u.Data["hash"] = hash
+		flag, password := u.Password(u.Data["password"], hash)
 		if !flag {
 			return -1, "密码操作失败."
 		}

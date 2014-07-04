@@ -87,6 +87,13 @@ func (model *Model) GetData(field string) (string, int) {
 	return model.Data[field], len(model.Data[field])
 }
 
+func (model *Model) CleanData() *Model{
+	for key := range model.Data {
+		delete(model.Data, key)
+	}
+	return model
+}
+
 //insert data 
 func (model *Model) Insert() (int64, error) {
 	str, args := model.CookMap(model.Data, " =?, ", ", ")
@@ -95,6 +102,7 @@ func (model *Model) Insert() (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return result, err
 }
 
@@ -126,9 +134,9 @@ func (model *Model) CookMap(data map[string]string, sep string, cutset string) (
 		fields = append(fields, field)
 		values = append(values, value)
 	}
-	/*for _, arg := range model.args {
+	for _, arg := range model.args {
 		values = append(values, arg)
-	}*/
+	}
 	return strings.Trim(strings.Join(fields, sep)+sep, cutset), values
 }
 

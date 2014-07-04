@@ -48,33 +48,6 @@ func (m *Menu) Init() {
 				},
 			},
 		},
-		Item{
-			ID:   "admin_yuning",
-			Name: "内容库",
-			Items: []Item{
-				Item{
-					ID:   "1",
-					Name: "用户",
-					Items: []Item{
-						Item{
-							ID:   "admin_user1",
-							Name: "用户管理1",
-							Url:  "/admin/user/index",
-						},
-						Item{
-							ID:   "admin_group2",
-							Name: "用户组2",
-							Url:  "/admin/group/index",
-						},
-						Item{
-							ID:   "admin_user_passwd3",
-							Name: "修改密码3",
-							Url:  "/admin/user/password",
-						},
-					},
-				},
-			},
-		},
 	}
 }
 

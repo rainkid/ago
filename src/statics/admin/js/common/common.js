@@ -95,7 +95,7 @@ function ajaxForm(formName, callback, presubmit) {
 function ajaxCall(ret) {
 	if (ret == '') return false;
 	ret = ('object' == typeof(ret)) ? ret : eval('(' + ret + ')');
-	if (ret.success==0) {
+	if (ret.code==0) {
 		showMsg('提示', ret.msg);
 	} else {
 		showError('提示', ret.msg);
@@ -106,7 +106,7 @@ function ajaxCall(ret) {
 function ajaxRedirect(ret, url) {
 	if (ret == '') return false;
 	if (ret) {
-		if (ret.success==0) {
+		if (ret.code==0) {
 			showMsg('提示', ret.msg);
 			setTimeout(function() {
 						location.href = url;
@@ -128,7 +128,7 @@ function deleteOne(url, msg, e) {
 							dataType : 'json',
 							data : 'token='+token,
 							success : function(ret) {
-								if (ret.success==0) {
+								if (ret.code==0) {
 									showMsg('', ret.msg);
 									setTimeout(function() {
 												location.reload();
