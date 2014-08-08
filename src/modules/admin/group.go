@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"fmt"
 	admin "libs/admin"
 	models "models"
 	"strings"
@@ -28,13 +27,12 @@ func (c *Group) Add_post() {
 	values := c.GetInputs([]string{"name", "descrip"})
 	values["rvalue"] = strings.Join(c.GetInputList("rvalue"), ",")
 	mgroup := models.NewGroupModel()
-	mgroup.SetData(values)
 
-	if code, msg := mgroup.Valid(); code != 0 {
+	if code, msg := mgroup.Valid(&values); code != 0 {
 		c.Json(code, msg, nil)
 		return
 	}
-	mgroup.Insert()
+	mgroup.Insert(values)
 	c.Json(0, "操作成功", nil)
 }
 
@@ -56,15 +54,13 @@ func (c *Group) Edit_post() {
 	values := c.GetInputs([]string{"name", "descrip"})
 	values["rvalue"] = strings.Join(c.GetInputList("rvalue"), ",")
 	mgroup := models.NewGroupModel()
-	mgroup.SetData(values)
 
-	if code, msg := mgroup.Valid(); code != 0 {
+	if code, msg := mgroup.Valid(&values); code != 0 {
 		c.Json(code, msg, nil)
 		return
 	}
-	_, err := mgroup.Where("groupid=?", id).Update()
+	_, err := mgroup.Where("groupid=?", id).Update(values)
 	if err != nil {
-		fmt.Println(err)
 		c.Json(-1, "操作失败", nil)
 		return
 	}

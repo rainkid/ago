@@ -12,26 +12,16 @@ func NewGroupModel() *Group {
 	}
 }
 
-func (g *Group) Valid() (int64, string) {
-	name, nlen := g.GetData("name")
-	descrip, dlen := g.GetData("descrip")
-	rvalue, rlen := g.GetData("rvalue")
-
-	if nlen == 0 {
+func (g *Group) Valid(mData *map[string]string) (int64, string) {
+	d := *mData
+	if _, ok := d["name"]; !ok {
 		return g.code + 1, "名称不能为空."
 	}
-
-	if dlen == 0 {
+	if _, ok := d["descrip"]; !ok {
 		return g.code + 2, "描述不能为空."
 	}
-
-	if rlen == 0 {
+	if _, ok := d["rvalue"]; !ok {
 		return g.code + 3, "请选择至少一个权限."
 	}
-
-	g.Data["name"] = name
-	g.Data["descrip"] = descrip
-	g.Data["rvalue"] = rvalue
-
 	return 0, ""
 }

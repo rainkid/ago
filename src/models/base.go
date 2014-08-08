@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	db "libs/db"
+	utils "libs/utils"
 	"os"
 	"path"
 	"strings"
@@ -78,26 +79,17 @@ func (model *Model) Count() (int64, error) {
 	return total, nil
 }
 
-func (model *Model) SetData(data map[string]string) *Model {
-	model.Data = data
-	return model
-}
-
-func (model *Model) GetData(field string) (string, int) {
-	return model.Data[field], len(model.Data[field])
-}
-
-func (model *Model) CleanData() *Model{
+func (model *Model) CleanData() *Model {
 	for key := range model.Data {
 		delete(model.Data, key)
 	}
 	return model
 }
 
-//insert data 
-func (model *Model) Insert() (int64, error) {
-	str, args := model.CookMap(model.Data, " =?, ", ", ")
-	query := fmt.Sprintf("INSERT INTO %s SET %s", model.GetTable(), str)
+//insert data
+func (model *Model) Insert(mData map[string]string) (int64, error) {
+	data, args := model.CookMap(mData, " =?, ", ", ")
+	query := fmt.Sprintf("INSERT INTO %s SET %s", model.GetTable(), data)
 	result, err := model.Db().Execute(query, args...)
 	if err != nil {
 		return 0, err
@@ -106,10 +98,11 @@ func (model *Model) Insert() (int64, error) {
 	return result, err
 }
 
-//update 
-func (model *Model) Update() (int64, error) {
-	str, args := model.CookMap(model.Data, " =?, ", ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s%s", model.GetTable(), str, model.where)
+//update
+func (model *Model) Update(mData map[string]string) (int64, error) {
+	data, dargs := model.CookMap(mData, " =?, ", ", ")
+	args := utils.MapMerge(dargs, model.args)
+	query := fmt.Sprintf("UPDATE %s SET %s%s", model.GetTable(), data, model.where)
 	result, err := model.Db().Execute(query, args...)
 	if err != nil {
 		return 0, err
@@ -117,7 +110,7 @@ func (model *Model) Update() (int64, error) {
 	return result, err
 }
 
-//delete 
+//delete
 func (model *Model) Delete() (int64, error) {
 	query := fmt.Sprintf("DELETE FROM %s %s", model.GetTable(), model.where)
 	result, err := model.Db().Execute(query, model.args...)
@@ -133,9 +126,6 @@ func (model *Model) CookMap(data map[string]string, sep string, cutset string) (
 	for field, value := range data {
 		fields = append(fields, field)
 		values = append(values, value)
-	}
-	for _, arg := range model.args {
-		values = append(values, arg)
 	}
 	return strings.Trim(strings.Join(fields, sep)+sep, cutset), values
 }

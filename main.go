@@ -14,8 +14,8 @@ func main() {
 	file := path.Join(basepath, "src/configs", "app.ini")
 	app := dogo.NewApp(file)
 
-	//bootstart and run
-	app.Bootstrap(router).SetDefaultModule("admin").Run()
+	//Bootstrap and run
+	app.Bootstrap(router).SetDefaultModule("api").Run()
 }
 
 func getRouter() *dogo.Router {

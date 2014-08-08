@@ -2,7 +2,7 @@ package admin
 
 import (
 	"bytes"
-    // "fmt"
+	// "fmt"
 	utils "libs/utils"
 	models "models"
 	"strings"
@@ -44,7 +44,6 @@ func (c *User) Add_post() {
 	remoteAddr := strings.Split(c.GetRequest().RemoteAddr, ":")
 	values["registerip"] = remoteAddr[0]
 
-
 	result, _ := models.NewUserModel().Where("username = ?", values["username"]).Get()
 	if result["username"] != nil {
 		c.Json(-1, "用户已经存在.", nil)
@@ -52,13 +51,11 @@ func (c *User) Add_post() {
 	}
 
 	user := models.NewUserModel()
-	user.SetData(values)
-	if code, msg := user.Valid(); code != 0 {
-		c.Json(code, msg, nil)
+	if code, msg := user.Valid(&values); code != 0 {
+		c.Json(-1, msg, nil)
 		return
 	}
-
-	user.Insert()
+	user.Insert(values)
 	c.Json(0, "操作成功", nil)
 }
 
@@ -83,12 +80,11 @@ func (c *User) Edit_post() {
 	values := c.GetPosts([]string{"email", "password", "r_password", "groupid"})
 	user := models.NewUserModel()
 
-	user.SetData(values)
-	if code, msg := user.Valid(); code != 0 {
-		c.Json(code, msg, nil)
+	if code, msg := user.Valid(&values); code != 0 {
+		c.Json(-1, msg, nil)
 		return
 	}
-	user.Where("uid = ?", id).Update()
+	user.Where("uid = ?", id).Update(values)
 	c.Json(0, "操作成功", nil)
 }
 
@@ -118,7 +114,7 @@ func (c *User) Passwd_post() {
 		return
 	}
 	data := map[string]string{"password": password}
-	user.SetData(data).Wherep(c.UserInfo["uid"]).Update()
+	user.Wherep(c.UserInfo["uid"]).Update(data)
 	c.Json(0, "修改成功.", nil)
 }
 

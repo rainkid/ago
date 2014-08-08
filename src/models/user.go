@@ -22,9 +22,9 @@ func NewUserModel() *User {
 	}
 }
 
-func (u *User) Login() (int64, string) {
-	username, ulen := u.GetData("username")
-	password, plen := u.GetData("password")
+func (u *User) Login(mData map[string]string) (int64, string) {
+	username, ulen := mData["username"], len(mData["username"])
+	password, plen := mData["password"], len(mData["password"])
 
 	if ulen == 0 || plen == 0 {
 		return u.code + 2, ""
@@ -119,12 +119,13 @@ func (u *User) IsLogin() (bool, map[string]interface{}) {
 	return true, result
 }
 
-func (u *User) Valid() (int64, string) {
-	username, ulen := u.GetData("username")
-	password, plen := u.GetData("password")
-	email, elen := u.GetData("email")
-	groupid, _ := u.GetData("groupid")
-	r_password, rplen := u.GetData("r_password")
+func (u *User) Valid(mData *map[string]string) (int, string) {
+	d := *mData
+	username, ulen := d["username"], len(d["username"])
+	password, plen := d["password"], len(d["password"])
+	email, elen := d["email"], len(d["email"])
+	groupid, _ := d["groupid"], len(d["groupid"])
+	r_password, rplen := d["r_password"], len(d["r_password"])
 	hash := utils.RandString(8)
 
 	if username != "" && ulen == 0 {
@@ -141,35 +142,35 @@ func (u *User) Valid() (int64, string) {
 	if !bytes.Equal(utils.ItoByte(password), utils.ItoByte(r_password)) {
 		return -1, "密码与确认密码不一致."
 	}
-	delete(u.Data, "r_password")
+	delete(d, "r_password")
 
 	if username != "" {
-		u.Data["username"] = u.Data["username"]
+		d["username"] = d["username"]
 	}
 	if password != "" {
-		u.Data["hash"] = hash
-		flag, password := u.Password(u.Data["password"], hash)
+		d["hash"] = hash
+		flag, password := u.Password(d["password"], hash)
 		if !flag {
 			return -1, "密码操作失败."
 		}
-		u.Data["password"] = password
+		d["password"] = password
 	}
 	if email != "" {
-		u.Data["email"] = u.Data["email"]
+		d["email"] = d["email"]
 	}
 	if groupid != "" {
-		u.Data["groupid"] = u.Data["groupid"]
+		d["groupid"] = d["groupid"]
 	}
 
 	return 0, ""
 }
 
-func (u *User) LoginValid() (int64, string) {
-	if _, length := u.GetData("username"); length == 0 {
+func (u *User) LoginValid(mData map[string]string) (int64, string) {
+	if _, length := mData["username"], len(mData["username"]); length == 0 {
 		return u.code + 1, ""
 	}
 
-	if _, length := u.GetData("password"); length == 0 {
+	if _, length := mData["password"], len(mData["password"]); length == 0 {
 		return u.code + 2, ""
 	}
 	return 0, ""
