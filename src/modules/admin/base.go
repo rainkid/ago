@@ -21,7 +21,7 @@ type AdminBase struct {
 func (c *AdminBase) Init() {
 	c.InitParams()
 	//is not on login page
-	if c.Dispatcher.Controller != "login" {
+	if c.ControllerName != "login" {
 		c.CheckLogin()
 
 		c.Layout("layout/header.html")

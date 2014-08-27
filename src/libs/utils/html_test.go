@@ -7,16 +7,16 @@ import (
 
 func Test_LoadUrl(t *testing.T) {
 	hp := NewHtmlParse()
-	err := hp.LoadUrl("http://qudao.ebinf.com/mmb-union/cpsStat.jsp?uuuu=jinliquan&pppp=maiM_17Gou&startDat=2014-07-10")
+	err := hp.LoadUrl("http://tejia.hao123.com/o/a/shuma")
 	if err != nil {
 		fmt.Println(err)
 	}
 	// hp.Clear()
 	// fmt.Println(hp.content)
-	m := hp.FindByTagName("tr")
+	m := hp.FindByTagName("div")
 
 	fmt.Println(len(m[1][2]))
-	fmt.Println(m[1][2])
+	fmt.Println(m[3][2])
 	// fmt.Println(m)
 }
 
