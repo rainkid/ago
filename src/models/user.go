@@ -123,8 +123,8 @@ func (u *User) Valid(mData *map[string]string) (int, string) {
 	d := *mData
 	username, ulen := d["username"], len(d["username"])
 	password, plen := d["password"], len(d["password"])
-	email, elen := d["email"], len(d["email"])
-	groupid, _ := d["groupid"], len(d["groupid"])
+	_, elen := d["email"], len(d["email"])
+	//groupid, _ := d["groupid"], len(d["groupid"])
 	r_password, rplen := d["r_password"], len(d["r_password"])
 	hash := utils.RandString(8)
 
@@ -144,9 +144,6 @@ func (u *User) Valid(mData *map[string]string) (int, string) {
 	}
 	delete(d, "r_password")
 
-	if username != "" {
-		d["username"] = d["username"]
-	}
 	if password != "" {
 		d["hash"] = hash
 		flag, password := u.Password(d["password"], hash)
@@ -155,13 +152,7 @@ func (u *User) Valid(mData *map[string]string) (int, string) {
 		}
 		d["password"] = password
 	}
-	if email != "" {
-		d["email"] = d["email"]
-	}
-	if groupid != "" {
-		d["groupid"] = d["groupid"]
-	}
-
+	
 	return 0, ""
 }
 
