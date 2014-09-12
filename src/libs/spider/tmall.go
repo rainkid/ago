@@ -1,6 +1,7 @@
 package spider
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -12,23 +13,29 @@ type TmallItem struct {
 }
 
 func (ti *TmallItem) Start() {
-	url := fmt.Sprintf("http://detail.m.tmall.com/item.htm?id=%d", ti.item.id)
+	url := fmt.Sprintf("http://detail.m.tmall.com/item.htm?id=%s", ti.item.id)
 
 	ti.item.url = url
 	//get content
 	loader := NewLoader(url, "Get")
 	content, err := loader.Get()
-	if err != nil {
-		ti.item.err = err.Error()
-		Server.qerror <- ti.item
-		return
-	}
+	ti.item.err = err
+	ti.CheckError()
 
 	hp := NewHtmlParse()
 	hp = hp.LoadData(fmt.Sprintf("%s", content)).Convert("gbk", "utf-8").Replace()
 	ti.content = hp.content
 
-	ti.GetTitle().GetPrice().GetImg()
+	if ti.GetTitle().CheckError() {
+		return
+	}
+	//check price
+	if ti.GetPrice().CheckError() {
+		return
+	}
+	if ti.GetImg().CheckError() {
+		return
+	}
 
 	Server.qfinish <- ti.item
 }
@@ -37,9 +44,10 @@ func (ti *TmallItem) GetTitle() *TmallItem {
 	hp := NewHtmlParse().LoadData(ti.content)
 	title := hp.FindJson("title")
 	if title == nil {
-		return ti.SError(`get title error.`)
+		ti.item.err = errors.New(`get title error`)
+		return ti
 	}
-	ti.item.title = title[0][1]
+	ti.item.data["title"] = title[0][1]
 	return ti
 }
 
@@ -59,13 +67,15 @@ func (ti *TmallItem) GetPrice() *TmallItem {
 
 	jsonData := hp.Partten(`{"isSuccess":true.*}}}`).FindStringSubmatch()
 	if jsonData == nil {
-		return ti.SError(`get prices jsondata error.`)
+		ti.item.err = errors.New(`get prices jsondata error`)
+		return ti
 	}
 	hp.LoadData(jsonData[0])
 	prices := hp.FindJson("price")
 	lp := len(prices)
 	if prices == nil {
-		return ti.SError(`get prices error.`)
+		ti.item.err = errors.New(`get prices error`)
+		return ti
 	}
 	for i := 0; i < lp; i++ {
 		p, _ := strconv.ParseFloat(prices[i][1], 64)
@@ -75,26 +85,30 @@ func (ti *TmallItem) GetPrice() *TmallItem {
 			}
 		}
 	}
-	ti.item.price = price
+	ti.item.data["price"] = fmt.Sprintf("%.2f", price)
 	return ti
 }
 
 func (ti *TmallItem) GetImg() *TmallItem {
 	hp := NewHtmlParse().LoadData(ti.content)
-	d := hp.FindByAttr("section", "id", "s-showcase")
-	if d == nil {
-		return ti.SError(`get imgs error.`)
+	data := hp.FindByAttr("section", "id", "s-showcase")
+	if data == nil {
+		ti.item.err = errors.New(`get imgs error`)
+		return ti
 	}
-	p := hp.LoadData(d[0][2]).Partten(`(?U)src="(.*)"`).FindStringSubmatch()
-	if p == nil {
-		return ti.SError(`get imgs error.`)
+	pdata := hp.LoadData(data[0][2]).Partten(`(?U)src="(.*)"`).FindStringSubmatch()
+	if pdata == nil {
+		ti.item.err = errors.New(`get imgs error`)
+		return ti
 	}
-	ti.item.img = p[1]
+	ti.item.data["img"] = pdata[1]
 	return ti
 }
 
-func (ti *TmallItem) SError(msg string) *TmallItem{
-	ti.item.err = msg
-	Server.qerror<-ti.item
-	return ti
+func (ti *TmallItem) CheckError() bool {
+	if ti.item.err != nil {
+		Server.qerror <- ti.item
+		return true
+	}
+	return false
 }

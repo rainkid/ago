@@ -1,15 +1,19 @@
 package spider
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 )
 
 var (
-	Server *Spider
-	loger  *log.Logger = log.New(os.Stdout, "[spider] ", log.Ldate|log.Ltime)
+	Server      *Spider
+	loger       *log.Logger = log.New(os.Stdout, "[SPIDER] ", log.Ldate|log.Ltime)
+	smsUrl      string      = "http://gou.3gtest.gionee.com/api/wifi/sms"
+	callbackUrl string      = "http://gou.3gtest.gionee.com/api/apk/"
 )
 
 type Spider struct {
@@ -19,13 +23,11 @@ type Spider struct {
 }
 
 type Item struct {
-	id    int
-	url   string
-	title string
-	price float64
-	img   string
-	tag   string
-	err string
+	id   string
+	url  string
+	data map[string]string
+	tag  string
+	err  error
 }
 
 func NewSpider() *Spider {
@@ -59,17 +61,37 @@ func (spider *Spider) Do(item *Item) {
 		ti := &MMBItem{item: item}
 		go ti.Start()
 		break
+	case "shop":
+		ti := &Shop{item: item}
+		go ti.Start()
+		break
 	}
-
+	return
 }
 
 func (spider *Spider) Error(item *Item) {
-	loger.Println("error with", item.tag," ", item.err)
+	if item.err != nil {
+		loger.Println("[ERROR]", item.url, item.err.Error())
+		content := fmt.Sprintf("%s %s", item.url, item.err.Error())
+		url := fmt.Sprintf("%s?mobile=13809886150&content=%s&token=8153fa24b617b0165740211f4965dd2f", smsUrl, content)
+		_, err := http.Get(url)
+		if err != nil {
+			loger.Panicln("[ERROR] send sms error.")
+		}
+		item.err = nil
+	}
+	return
 }
 
 func (spider *Spider) Finish(item *Item) {
-	loger.Println("finished with", item.url)
-	fmt.Println(item)
+	loger.Println("[SUCCESS]", item.url)
+	output, err := json.Marshal(item.data)
+	if err != nil {
+		fmt.Println("error with json output")
+		return
+	}
+	fmt.Println(fmt.Sprintf("%s", output))
+	return
 }
 
 func (spider *Spider) Daemon() {
@@ -79,10 +101,12 @@ func (spider *Spider) Daemon() {
 	}
 }
 
-func (spider *Spider) Add(tag string, id int) {
+func (spider *Spider) Add(tag, id string) {
 	item := &Item{
-		tag: tag,
-		id:  id,
+		tag:  tag,
+		id:   id,
+		data: make(map[string]string),
+		err:  nil,
 	}
 	spider.qstart <- item
 }
@@ -91,13 +115,13 @@ func (spider *Spider) Listen() {
 	for {
 		select {
 		case item := <-spider.qstart:
-			spider.Do(item)
+			go spider.Do(item)
 			break
 		case item := <-spider.qfinish:
-			spider.Finish(item)
+			go spider.Finish(item)
 			break
 		case item := <-spider.qerror:
-			spider.Error(item)
+			go spider.Error(item)
 			break
 		}
 	}
