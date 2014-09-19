@@ -4,16 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
+	"net/url"
 	"os"
 	"time"
 )
 
 var (
-	Server      *Spider
-	loger       *log.Logger = log.New(os.Stdout, "[SPIDER] ", log.Ldate|log.Ltime)
-	smsUrl      string      = "http://gou.3gtest.gionee.com/api/wifi/sms"
-	callbackUrl string      = "http://gou.3gtest.gionee.com/api/apk/"
+	Server *Spider
+	loger  *log.Logger = log.New(os.Stdout, "[SPIDER] ", log.Ldate|log.Ltime)
+	smsUrl string      = "http://gou.3gtest.gionee.com/api/wifi/sms"
 )
 
 type Spider struct {
@@ -23,11 +22,12 @@ type Spider struct {
 }
 
 type Item struct {
-	id   string
-	url  string
-	data map[string]string
-	tag  string
-	err  error
+	id       string
+	url      string
+	callback string
+	data     map[string]string
+	tag      string
+	err      error
 }
 
 func NewSpider() *Spider {
@@ -49,21 +49,25 @@ func Start() *Spider {
 
 func (spider *Spider) Do(item *Item) {
 	switch item.tag {
-	case "tmall":
-		ti := &TmallItem{item: item}
-		go ti.Start()
+	case "TmallItem":
+		ti := &Tmall{item: item}
+		go ti.Item()
 		break
-	case "taobao":
-		ti := &TaobaoItem{item: item}
-		go ti.Start()
+	case "TaobaoItem":
+		ti := &Taobao{item: item}
+		go ti.Item()
 		break
-	case "mmb":
-		ti := &MMBItem{item: item}
-		go ti.Start()
+	case "MmbItem":
+		ti := &MMB{item: item}
+		go ti.Item()
 		break
-	case "shop":
-		ti := &Shop{item: item}
-		go ti.Start()
+	case "TmallShop":
+		ti := &Tmall{item: item}
+		go ti.Shop()
+		break
+	case "Other":
+		ti := &Other{item: item}
+		go ti.Get()
 		break
 	}
 	return
@@ -74,7 +78,9 @@ func (spider *Spider) Error(item *Item) {
 		loger.Println("[ERROR]", item.url, item.err.Error())
 		content := fmt.Sprintf("%s %s", item.url, item.err.Error())
 		url := fmt.Sprintf("%s?mobile=13809886150&content=%s&token=8153fa24b617b0165740211f4965dd2f", smsUrl, content)
-		_, err := http.Get(url)
+
+		loader := NewLoader(url, "Get")
+		_, err := loader.Send(nil)
 		if err != nil {
 			loger.Panicln("[ERROR] send sms error.")
 		}
@@ -87,10 +93,18 @@ func (spider *Spider) Finish(item *Item) {
 	loger.Println("[SUCCESS]", item.url)
 	output, err := json.Marshal(item.data)
 	if err != nil {
-		fmt.Println("error with json output")
+		loger.Println("error with json output")
 		return
 	}
-	fmt.Println(fmt.Sprintf("%s", output))
+	v := url.Values{}
+	v.Add("id", item.id)
+	v.Add("data", fmt.Sprintf("%s", output))
+
+	loader := NewLoader(item.callback, "Post")
+	_, err = loader.Send(v)
+	if err != nil {
+		loger.Println("callback with", item.tag, item.id)
+	}
 	return
 }
 
@@ -101,12 +115,13 @@ func (spider *Spider) Daemon() {
 	}
 }
 
-func (spider *Spider) Add(tag, id string) {
+func (spider *Spider) Add(tag, id, callback string) {
 	item := &Item{
-		tag:  tag,
-		id:   id,
-		data: make(map[string]string),
-		err:  nil,
+		tag:      tag,
+		id:       id,
+		callback: callback,
+		data:     make(map[string]string),
+		err:      nil,
 	}
 	spider.qstart <- item
 }

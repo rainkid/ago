@@ -105,8 +105,15 @@ func (hp *HtmlParse) FindByTagName(tagName string) [][]string {
 	return re.FindAllStringSubmatch(hp.content, -1)
 }
 
-func (hp *HtmlParse) FindJson(nodeName string) [][]string {
+func (hp *HtmlParse) FindJsonStr(nodeName string) [][]string {
 	hp.partten = fmt.Sprintf(`(?U)"%s":"(.*)"`, nodeName)
+	re := regexp.MustCompile(hp.partten)
+	// fmt.Println(re.String())
+	return re.FindAllStringSubmatch(hp.content, -1)
+}
+
+func (hp *HtmlParse) FindJsonInt(nodeName string) [][]string {
+	hp.partten = fmt.Sprintf(`(?U)"%s":(.*),`, nodeName)
 	re := regexp.MustCompile(hp.partten)
 	// fmt.Println(re.String())
 	return re.FindAllStringSubmatch(hp.content, -1)

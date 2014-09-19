@@ -7,18 +7,18 @@ import (
 	"strings"
 )
 
-type TmallItem struct {
+type Tmall struct {
 	item    *Item
 	content string
 }
 
-func (ti *TmallItem) Start() {
+func (ti *Tmall) Item() {
 	url := fmt.Sprintf("http://detail.m.tmall.com/item.htm?id=%s", ti.item.id)
 
 	ti.item.url = url
 	//get content
 	loader := NewLoader(url, "Get")
-	content, err := loader.Get()
+	content, err := loader.Send(nil)
 	ti.item.err = err
 	ti.CheckError()
 
@@ -26,23 +26,23 @@ func (ti *TmallItem) Start() {
 	hp = hp.LoadData(fmt.Sprintf("%s", content)).Convert("gbk", "utf-8").Replace()
 	ti.content = hp.content
 
-	if ti.GetTitle().CheckError() {
+	if ti.GetItemTitle().CheckError() {
 		return
 	}
 	//check price
-	if ti.GetPrice().CheckError() {
+	if ti.GetItemPrice().CheckError() {
 		return
 	}
-	if ti.GetImg().CheckError() {
+	if ti.GetItemImg().CheckError() {
 		return
 	}
 
 	Server.qfinish <- ti.item
 }
 
-func (ti *TmallItem) GetTitle() *TmallItem {
+func (ti *Tmall) GetItemTitle() *Tmall {
 	hp := NewHtmlParse().LoadData(ti.content)
-	title := hp.FindJson("title")
+	title := hp.FindJsonStr("title")
 	if title == nil {
 		ti.item.err = errors.New(`get title error`)
 		return ti
@@ -51,7 +51,7 @@ func (ti *TmallItem) GetTitle() *TmallItem {
 	return ti
 }
 
-func (ti *TmallItem) GetPrice() *TmallItem {
+func (ti *Tmall) GetItemPrice() *Tmall {
 	hp := NewHtmlParse().LoadData(ti.content)
 
 	defaultPriceArr := hp.FindByAttr("b", "class", "ui-yen")
@@ -71,7 +71,7 @@ func (ti *TmallItem) GetPrice() *TmallItem {
 		return ti
 	}
 	hp.LoadData(jsonData[0])
-	prices := hp.FindJson("price")
+	prices := hp.FindJsonStr("price")
 	lp := len(prices)
 	if prices == nil {
 		ti.item.err = errors.New(`get prices error`)
@@ -89,7 +89,7 @@ func (ti *TmallItem) GetPrice() *TmallItem {
 	return ti
 }
 
-func (ti *TmallItem) GetImg() *TmallItem {
+func (ti *Tmall) GetItemImg() *Tmall {
 	hp := NewHtmlParse().LoadData(ti.content)
 	data := hp.FindByAttr("section", "id", "s-showcase")
 	if data == nil {
@@ -105,7 +105,60 @@ func (ti *TmallItem) GetImg() *TmallItem {
 	return ti
 }
 
-func (ti *TmallItem) CheckError() bool {
+func (ti *Tmall) Shop() {
+	url := fmt.Sprintf("http://shop.m.tmall.com/?user_id=%s", ti.item.id)
+
+	ti.item.url = url
+	//get content
+	loader := NewLoader(url, "Get")
+	content, err := loader.Send(nil)
+	if err != nil {
+		ti.item.err = err
+		Server.qerror <- ti.item
+		return
+	}
+
+	hp := NewHtmlParse()
+	hp = hp.LoadData(fmt.Sprintf("%s", content)).Replace()
+	ti.content = hp.content
+
+	// fmt.Println(ti.content)
+
+	if ti.GetShopTitle().CheckError() {
+		return
+	}
+	if ti.GetShopImgs().CheckError() {
+		return
+	}
+	Server.qfinish <- ti.item
+}
+
+func (ti *Tmall) GetShopTitle() *Tmall {
+	hp := NewHtmlParse().LoadData(ti.content)
+	title := hp.FindByTagName("h1")
+
+	if title == nil {
+		ti.item.err = errors.New(`get title error`)
+		return ti
+	}
+	ti.item.data["title"] = title[0][2]
+	return ti
+}
+
+func (ti *Tmall) GetShopImgs() *Tmall {
+	hp := NewHtmlParse().LoadData(ti.content)
+	imgs := hp.Partten(`(?U)dataimg="(.*)"`).FindAllSubmatch()
+
+	if imgs == nil {
+		ti.item.err = errors.New(`get imgs error`)
+		return ti
+	}
+	ti.item.data["logo"] = fmt.Sprintf("%s", imgs[0][1])
+	ti.item.data["imgs"] = fmt.Sprintf("%s,%s,%s", imgs[1][1], imgs[2][1], imgs[3][1])
+	return ti
+}
+
+func (ti *Tmall) CheckError() bool {
 	if ti.item.err != nil {
 		Server.qerror <- ti.item
 		return true

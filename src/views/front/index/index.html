@@ -1,0 +1,32 @@
+{{define "content"}}
+<table>
+	<form method="post" action="http://127.0.0.1:8090/front/index/test">
+	<tr>
+		<td>开始时间</td>
+		<td>
+			<select name="queryType">
+				<option value="1">创建时间</option>
+				<option value="3">结算时间</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>开始时间</td>
+		<td><input name="startTime"/></td>
+	</tr>
+	<tr>
+		<td>结束时间</td>
+		<td><input name="endTime"/></td>
+	</tr>
+	<tr>
+		<td>Cookie</td>
+		<td><textarea name="cookie"></textarea></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><button type="submit" name="提交" >提交查询</button></td>
+	</tr>
+	</form>
+</table>
+
+{{end}}

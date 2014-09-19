@@ -7,37 +7,37 @@ import (
 	"strings"
 )
 
-type TaobaoItem struct {
+type Taobao struct {
 	item    *Item
 	content string
 }
 
-func (ti *TaobaoItem) Start() {
+func (ti *Taobao) Item() {
 	url := fmt.Sprintf("http://hws.m.taobao.com/cache/wdetail/5.0/?id=%s", ti.item.id)
 
 	ti.item.url = url
 	//get content
 	loader := NewLoader(url, "Get")
-	content, err := loader.Get()
+	content, err := loader.Send(nil)
 	ti.item.err = err
 	ti.CheckError()
 
 	ti.content = strings.Replace(fmt.Sprintf("%s", content), `\"`, `"`, -1)
-	if ti.GetTitle().CheckError() {
+	if ti.GetItemTitle().CheckError() {
 		return
 	}
 	//check price
-	if ti.GetPrice().CheckError() {
+	if ti.GetItemPrice().CheckError() {
 		return
 	}
-	if ti.GetImg().CheckError() {
+	if ti.GetItemImg().CheckError() {
 		return
 	}
 
 	Server.qfinish <- ti.item
 }
 
-func (ti *TaobaoItem) GetTitle() *TaobaoItem {
+func (ti *Taobao) GetItemTitle() *Taobao {
 	hp := NewHtmlParse().LoadData(ti.content)
 	title := hp.Partten(`(?U)"itemId":"\d+","title":"(.*)"`).FindStringSubmatch()
 
@@ -49,7 +49,7 @@ func (ti *TaobaoItem) GetTitle() *TaobaoItem {
 	return ti
 }
 
-func (ti *TaobaoItem) GetPrice() *TaobaoItem {
+func (ti *Taobao) GetItemPrice() *Taobao {
 	hp := NewHtmlParse().LoadData(ti.content)
 	price := hp.Partten(`(?U)"rangePrice":".*","price":"(.*)"`).FindStringSubmatch()
 
@@ -62,7 +62,7 @@ func (ti *TaobaoItem) GetPrice() *TaobaoItem {
 	return ti
 }
 
-func (ti *TaobaoItem) GetImg() *TaobaoItem {
+func (ti *Taobao) GetItemImg() *Taobao {
 	hp := NewHtmlParse().LoadData(ti.content)
 	img := hp.Partten(`(?U)"picsPath":\["(.*)"`).FindStringSubmatch()
 
@@ -74,7 +74,7 @@ func (ti *TaobaoItem) GetImg() *TaobaoItem {
 	return ti
 }
 
-func (ti *TaobaoItem) CheckError() bool {
+func (ti *Taobao) CheckError() bool {
 	if ti.item.err != nil {
 		Server.qerror <- ti.item
 		return true

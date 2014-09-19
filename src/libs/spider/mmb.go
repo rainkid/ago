@@ -6,18 +6,18 @@ import (
 	"strconv"
 )
 
-type MMBItem struct {
+type MMB struct {
 	item    *Item
 	content string
 }
 
-func (ti *MMBItem) Start() {
+func (ti *MMB) Item() {
 	url := fmt.Sprintf("http://mmb.cn/wap/shop/product.do?id=%s", ti.item.id)
 
 	ti.item.url = url
 	//get content
 	loader := NewLoader(url, "Get")
-	content, err := loader.Get()
+	content, err := loader.Send(nil)
 	ti.item.err = err
 	if ti.CheckError() {
 		return
@@ -28,23 +28,23 @@ func (ti *MMBItem) Start() {
 	ti.content = hp.content
 	// ti.content = fmt.Sprintf("%s", content)
 	//get title and check
-	if ti.GetTitle().CheckError() {
+	if ti.GetItemTitle().CheckError() {
 		return
 	}
 	//check price
-	if ti.GetPrice().CheckError() {
+	if ti.GetItemPrice().CheckError() {
 		return
 	}
-	if ti.GetImg().CheckError() {
+	if ti.GetItemImg().CheckError() {
 		return
 	}
 
 	Server.qfinish <- ti.item
 }
 
-func (ti *MMBItem) GetTitle() *MMBItem {
+func (ti *MMB) GetItemTitle() *MMB {
 	hp := NewHtmlParse().LoadData(ti.content)
-	title := hp.Partten(`(?U)</div></div><div class="class169">(.*)<img`).FindStringSubmatch()
+	title := hp.Partten(`(?U)<div class="class169">([[:^ascii:]]+)<img`).FindStringSubmatch()
 	if title == nil {
 		ti.item.err = errors.New(`get title error`)
 		return ti
@@ -53,7 +53,7 @@ func (ti *MMBItem) GetTitle() *MMBItem {
 	return ti
 }
 
-func (ti *MMBItem) GetPrice() *MMBItem {
+func (ti *MMB) GetItemPrice() *MMB {
 	hp := NewHtmlParse().LoadData(ti.content)
 	price := hp.Partten(`(?U)<span style="color:#F6310A;">(.*)</span>`).FindStringSubmatch()
 
@@ -66,7 +66,7 @@ func (ti *MMBItem) GetPrice() *MMBItem {
 	return ti
 }
 
-func (ti *MMBItem) GetImg() *MMBItem {
+func (ti *MMB) GetItemImg() *MMB {
 	hp := NewHtmlParse().LoadData(ti.content)
 	img := hp.Partten(`(?U)"(http://rep.mmb.cn/wap/upload/productImage/+.*)"`).FindStringSubmatch()
 	if img == nil {
@@ -77,7 +77,7 @@ func (ti *MMBItem) GetImg() *MMBItem {
 	return ti
 }
 
-func (ti *MMBItem) CheckError() bool {
+func (ti *MMB) CheckError() bool {
 	if ti.item.err != nil {
 		Server.qerror <- ti.item
 		return true

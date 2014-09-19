@@ -1,20 +1,32 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/rainkid/dogo"
 	"os"
 	"path"
 )
 
-
-
 func main() {
+	cfgdir := flag.String("c", "", "please input build dir with")
+	flag.Parse()
+	l := len(*cfgdir)
+	if l == 0 {
+		fmt.Println("please input build dir with -c")
+		os.Exit(0)
+	}
+	defer func() {
+		fmt.Println("...")
+		if err := recover(); err != nil {
+			dogo.Loger.Println("run time panic: ", err)
+		}
+	}()
+
 	router := getRouter()
 
 	// bootstrap and return a app
-	basepath, _ := os.Getwd()
-	file := path.Join(basepath, "src/configs", "app.ini")
-	app := dogo.NewApp(file)
+	app := dogo.NewApp(*cfgdir + "/app.ini")
 
 	//Bootstrap and run
 	app.Bootstrap(router).SetDefaultModule("api").Run()
