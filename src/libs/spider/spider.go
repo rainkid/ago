@@ -65,6 +65,10 @@ func (spider *Spider) Do(item *Item) {
 		ti := &Tmall{item: item}
 		go ti.Shop()
 		break
+	case "TaobaoShop":
+		ti := &Taobao{item: item}
+		go ti.Shop()
+		break
 	case "Other":
 		ti := &Other{item: item}
 		go ti.Get()
@@ -103,7 +107,7 @@ func (spider *Spider) Finish(item *Item) {
 	loader := NewLoader(item.callback, "Post")
 	_, err = loader.Send(v)
 	if err != nil {
-		loger.Println("callback with", item.tag, item.id)
+		loger.Println("callback with", item.tag, item.id, item.callback)
 	}
 	return
 }

@@ -20,7 +20,8 @@ var (
 )
 
 func GetConfig(filename string, name string) string {
-	config, err := dogo.NewConfig(fmt.Sprintf("src/configs/%s.ini", filename))
+	cfgpath := dogo.Register.Get("cfg_path")
+	config, err := dogo.NewConfig(fmt.Sprintf("%s/%s.ini", cfgpath, filename))
 	if err != nil {
 		return ""
 	}
@@ -32,7 +33,8 @@ func GetConfig(filename string, name string) string {
 }
 
 func Env() string {
-	config, err := dogo.NewConfig("src/configs/app.ini")
+	inipath := dogo.Register.Get("app_ini")
+	config, err := dogo.NewConfig(inipath)
 	if err != nil {
 		loger.Print(err.Error())
 		return env

@@ -2,10 +2,9 @@ package models
 
 import (
 	"fmt"
+	"github.com/rainkid/dogo"
 	db "libs/db"
 	utils "libs/utils"
-	"os"
-	"path"
 	"strings"
 )
 
@@ -135,7 +134,7 @@ func (model *Model) GetTable() string {
 }
 
 func (model *Model) Db() *db.Mysql {
-	basepath, _ := os.Getwd()
-	file := path.Join(basepath, "src/configs", "mysql.ini")
+	cfgpath := dogo.NewRegister().Get("cfg_path")
+	file := fmt.Sprintf("%s/mysql.ini", cfgpath)
 	return db.NewMysql(file)
 }

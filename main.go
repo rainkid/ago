@@ -8,26 +8,30 @@ import (
 	"path"
 )
 
+var cfgdir = flag.String("c", "", "please input build dir with")
+
 func main() {
-	cfgdir := flag.String("c", "", "please input build dir with")
 	flag.Parse()
 	l := len(*cfgdir)
 	if l == 0 {
 		fmt.Println("please input build dir with -c")
 		os.Exit(0)
 	}
+
 	defer func() {
-		fmt.Println("...")
 		if err := recover(); err != nil {
 			dogo.Loger.Println("run time panic: ", err)
 		}
 	}()
 
 	router := getRouter()
+	app_ini := fmt.Sprintf("%s/app.ini", *cfgdir)
+
+	dogo.Register.Set("app_ini", app_ini)
+	dogo.Register.Set("cfg_path", *cfgdir)
 
 	// bootstrap and return a app
-	app := dogo.NewApp(*cfgdir + "/app.ini")
-
+	app := dogo.NewApp(app_ini)
 	//Bootstrap and run
 	app.Bootstrap(router).SetDefaultModule("api").Run()
 }
@@ -44,7 +48,7 @@ func getRouter() *dogo.Router {
 	AddSampleRoute(router)
 
 	//add regex router and default is sample route
-	router.AddRegexRoute("/", "/admin/login/index")
+	// router.AddRegexRoute("/", "/admin/login/index")
 
 	return router
 }

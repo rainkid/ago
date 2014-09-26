@@ -106,7 +106,7 @@ func (ti *Tmall) GetItemImg() *Tmall {
 }
 
 func (ti *Tmall) Shop() {
-	url := fmt.Sprintf("http://shop.m.tmall.com/?user_id=%s", ti.item.id)
+	url := fmt.Sprintf("http://shop.m.tmall.com/?shop_id=%s", ti.item.id)
 
 	ti.item.url = url
 	//get content
@@ -121,8 +121,6 @@ func (ti *Tmall) Shop() {
 	hp := NewHtmlParse()
 	hp = hp.LoadData(fmt.Sprintf("%s", content)).Replace()
 	ti.content = hp.content
-
-	// fmt.Println(ti.content)
 
 	if ti.GetShopTitle().CheckError() {
 		return
