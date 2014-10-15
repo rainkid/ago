@@ -8,11 +8,11 @@ import (
 
 type MMB struct {
 	item    *Item
-	content string
+	content []byte
 }
 
 func (ti *MMB) Item() {
-	url := fmt.Sprintf("http://mmb.cn/wap/shop/product.do?id=%s", ti.item.id)
+	url := fmt.Sprintf("http://mmb.cn/wap/touch/html/product/id_%s.htm", ti.item.id)
 
 	ti.item.url = url
 	//get content
@@ -24,7 +24,7 @@ func (ti *MMB) Item() {
 	}
 
 	hp := NewHtmlParse()
-	hp = hp.LoadData(fmt.Sprintf("%s", content)).Replace()
+	hp = hp.LoadData(content)
 	ti.content = hp.content
 	// ti.content = fmt.Sprintf("%s", content)
 	//get title and check
@@ -38,30 +38,33 @@ func (ti *MMB) Item() {
 	if ti.GetItemImg().CheckError() {
 		return
 	}
-
 	Server.qfinish <- ti.item
 }
 
 func (ti *MMB) GetItemTitle() *MMB {
 	hp := NewHtmlParse().LoadData(ti.content)
-	title := hp.Partten(`(?U)<div class="class169">([[:^ascii:]]+)<img`).FindStringSubmatch()
+	title := hp.FindByTagName("title")
+
 	if title == nil {
 		ti.item.err = errors.New(`get title error`)
 		return ti
 	}
-	ti.item.data["title"] = fmt.Sprintf("%s", title[1])
+	ti.item.data["title"] = fmt.Sprintf("%s", title[0][2])
 	return ti
 }
 
 func (ti *MMB) GetItemPrice() *MMB {
 	hp := NewHtmlParse().LoadData(ti.content)
-	price := hp.Partten(`(?U)<span style="color:#F6310A;">(.*)</span>`).FindStringSubmatch()
+	price := hp.Partten(`(?U)￥.*(\d{1,10}\.\d{1,2})`).FindStringSubmatch()
 
+	if price == nil {
+		price = hp.Partten(`(?U)￥<span.*>(.*)</span>`).FindStringSubmatch()
+	}
 	if price == nil {
 		ti.item.err = errors.New(`get price error`)
 		return ti
 	}
-	iprice, _ := strconv.ParseFloat(price[1], 64)
+	iprice, _ := strconv.ParseFloat(fmt.Sprintf("%s", price[1]), 64)
 	ti.item.data["price"] = fmt.Sprintf("%.2f", iprice)
 	return ti
 }
@@ -70,10 +73,13 @@ func (ti *MMB) GetItemImg() *MMB {
 	hp := NewHtmlParse().LoadData(ti.content)
 	img := hp.Partten(`(?U)"(http://rep.mmb.cn/wap/upload/productImage/+.*)"`).FindStringSubmatch()
 	if img == nil {
+		img = hp.Partten(`(?U)"(.*/wap/upload/productImage/+.*)"`).FindStringSubmatch()
+	}
+	if img == nil {
 		ti.item.err = errors.New(`get img error`)
 		return ti
 	}
-	ti.item.data["img"] = img[1]
+	ti.item.data["img"] = fmt.Sprintf("%s", img[1])
 	return ti
 }
 

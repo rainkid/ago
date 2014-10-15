@@ -90,15 +90,15 @@ func load(params map[string]string, page int) ([]byte, error) {
 
 func dataToString(d []byte, flag *bool, total *int) string {
 	hp := spider.NewHtmlParse()
-	hp = hp.LoadData(fmt.Sprintf("%s", d))
+	hp = hp.LoadData(d)
 	o := hp.Partten(`(?U){"status".*}`).FindAllSubmatch()
 	var l int = len(o)
 	if l == 0 {
 		fmt.Println("match data error,please input cookie ")
 		return ""
 	}
-	hp.LoadData(fmt.Sprintf("%s", o[0][0]))
-	if hp.FindJsonInt("lastPage")[0][1] == "true" {
+	hp.LoadData(o[0][0])
+	if fmt.Sprintf("%s", hp.FindJsonInt("lastPage")[0][1]) == "true" {
 		*flag = true
 	} else {
 		*flag = false
@@ -106,8 +106,7 @@ func dataToString(d []byte, flag *bool, total *int) string {
 	var output string
 	if l > 0 {
 		for i := 1; i < l; i++ {
-			order := fmt.Sprintf("%s", o[i][0])
-			hp.LoadData(order)
+			hp.LoadData(o[i][0])
 			/*output += fmt.Sprintf("%s,%s,%s, %s\n",
 			hp.FindJsonStr("auctionTitle")[0][1],
 			hp.FindJsonInt("auctionNum")[0][1],

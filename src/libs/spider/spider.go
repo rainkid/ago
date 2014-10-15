@@ -104,11 +104,14 @@ func (spider *Spider) Finish(item *Item) {
 	v.Add("id", item.id)
 	v.Add("data", fmt.Sprintf("%s", output))
 
-	loader := NewLoader(item.callback, "Post")
+	url, _ := url.QueryUnescape(item.callback)
+	loader := NewLoader(url, "Post")
 	_, err = loader.Send(v)
 	if err != nil {
-		loger.Println("callback with", item.tag, item.id, item.callback)
+		loger.Println("[ERROR] callback with error", err.Error())
+		return
 	}
+	loger.Println("[SUCCESS] callback tag:", item.tag, ",item.id:", item.id, ",callback:", url)
 	return
 }
 

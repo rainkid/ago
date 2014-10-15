@@ -1,6 +1,7 @@
 package spider
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"strconv"
@@ -9,7 +10,7 @@ import (
 
 type Taobao struct {
 	item    *Item
-	content string
+	content []byte
 }
 
 func (ti *Taobao) Item() {
@@ -22,7 +23,7 @@ func (ti *Taobao) Item() {
 	ti.item.err = err
 	ti.CheckError()
 
-	ti.content = strings.Replace(fmt.Sprintf("%s", content), `\"`, `"`, -1)
+	ti.content = bytes.Replace(content, []byte(`\"`), []byte(`"`), -1)
 	if ti.GetItemTitle().CheckError() {
 		return
 	}
@@ -33,7 +34,7 @@ func (ti *Taobao) Item() {
 	if ti.GetItemImg().CheckError() {
 		return
 	}
-
+	// fmt.Println(ti.item.data)
 	Server.qfinish <- ti.item
 }
 
@@ -45,7 +46,7 @@ func (ti *Taobao) GetItemTitle() *Taobao {
 		ti.item.err = errors.New(`get title error`)
 		return ti
 	}
-	ti.item.data["title"] = title[1]
+	ti.item.data["title"] = fmt.Sprintf("%s", title[1])
 	return ti
 }
 
@@ -54,10 +55,21 @@ func (ti *Taobao) GetItemPrice() *Taobao {
 	price := hp.Partten(`(?U)"rangePrice":".*","price":"(.*)"`).FindStringSubmatch()
 
 	if price == nil {
+		price = hp.Partten(`(?U)"price":"(.*)"`).FindStringSubmatch()
+	}
+	if price == nil {
 		ti.item.err = errors.New(`get price error`)
 		return ti
 	}
-	iprice, _ := strconv.ParseFloat(price[1], 64)
+
+	var iprice float64
+	if bytes.Index(price[1], []byte("-")) > 0 {
+		price = bytes.Split(price[1], []byte("-"))
+		iprice, _ = strconv.ParseFloat(fmt.Sprintf("%s", price[0]), 64)
+	} else {
+		iprice, _ = strconv.ParseFloat(fmt.Sprintf("%s", price[1]), 64)
+	}
+
 	ti.item.data["price"] = fmt.Sprintf("%.2f", iprice)
 	return ti
 }
@@ -70,17 +82,20 @@ func (ti *Taobao) GetItemImg() *Taobao {
 		ti.item.err = errors.New(`get img error`)
 		return ti
 	}
-	ti.item.data["img"] = img[1]
+	ti.item.data["img"] = fmt.Sprintf("%s", img[1])
 	return ti
 }
 
 func (ti *Taobao) Shop() {
-	url := fmt.Sprintf("http://shop%s.taobao.com/?search=y&orderType=hotsell_desc", ti.item.id)
-
+	if ti.GetShopTitle().CheckError() {
+		return
+	}
+	url := fmt.Sprintf("http://s.taobao.com/search?q=%s&app=shopsearch", ti.item.data["title"])
+	fmt.Println(url)
 	ti.item.url = url
 	//get content
 	loader := NewLoader(url, "Get")
-	loader.SetHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36")
+	loader.SetHeader("User-Agent", "Mozilla/5.0 (Linux; Android 4.3; Nexus 7 Build/JSS15Q) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.72 Safari/537.36")
 	content, err := loader.Send(nil)
 	if err != nil {
 		ti.item.err = err
@@ -89,53 +104,86 @@ func (ti *Taobao) Shop() {
 	}
 
 	hp := NewHtmlParse()
-	hp = hp.LoadData(fmt.Sprintf("%s", content)).Convert("gbk", "utf-8")
+	hp = hp.LoadData(content).CleanScript().Replace().Convert()
 	ti.content = hp.content
 
-	if ti.GetShopTitle().CheckError() {
-		return
-	}
-
-	if ti.GetShopRank().CheckError() {
+	if ti.GetShopLogo().CheckError() {
 		return
 	}
 
 	if ti.GetShopImgs().CheckError() {
 		return
 	}
+	fmt.Println(ti.item.data)
 	Server.qfinish <- ti.item
 }
 
 func (ti *Taobao) GetShopTitle() *Taobao {
-	hp := NewHtmlParse().LoadData(ti.content)
-	title := hp.Partten(`<title>店内搜索页-(.*)-淘宝网</title>`).FindStringSubmatch()
-	if title == nil {
-		ti.item.err = errors.New(`get title error`)
+	url := fmt.Sprintf("http://shop%s.taobao.com", ti.item.id)
+	fmt.Println(url)
+	ti.item.url = url
+	//get content
+	loader := NewLoader(url, "Get")
+	loader.SetHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36")
+	shop, err := loader.Send(nil)
+	// fmt.Println(fmt.Sprintf("%s", shop))
+	if err != nil {
+		ti.item.err = err
+		Server.qerror <- ti.item
 		return ti
 	}
-	ti.item.data["title"] = title[1]
+
+	hp := NewHtmlParse()
+	hp = hp.LoadData(shop).Convert().Replace()
+	shopname := hp.FindByTagName("title")
+	uid := hp.FindJsonStr("userId")
+
+	if shopname == nil {
+		ti.item.err = errors.New("get shop title error")
+		Server.qerror <- ti.item
+		return ti
+
+	}
+	ti.item.data["uid"] = fmt.Sprintf("%s", uid[0][1])
+	title := bytes.Replace(shopname[0][2], []byte("首页"), []byte(""), -1)
+	title = bytes.Replace(title, []byte("淘宝网"), []byte(""), -1)
+	title = bytes.Replace(title, []byte("-"), []byte(" "), -1)
+	title = bytes.Trim(title, " ")
+	ti.item.data["title"] = fmt.Sprintf("%s", title)
 	return ti
 }
 
 func (ti *Taobao) GetShopImgs() *Taobao {
 	hp := NewHtmlParse().LoadData(ti.content)
-	imgs := hp.Partten(`(?U)src="(.*/uploaded/.*)"`).FindAllSubmatch()
+	imgs := hp.Partten(`(?U)<a trace="auction".*data-uid="` + ti.item.data["uid"] + `".*> <img src="(.*)";"> </a>`).FindAllSubmatch()
+
 	if imgs == nil {
-		ti.item.err = errors.New(`get imgs error`)
+		ti.item.err = errors.New(`get shop imgs error`)
 		return ti
 	}
-	ti.item.data["imgs"] = fmt.Sprintf("%s,%s,%s", imgs[0][1], imgs[1][1], imgs[2][1])
+
+	var imglist []string
+	l := len(imgs)
+	if l > 3 {
+		l = 3
+	}
+	for i := 1; i <= l; i++ {
+		imglist = append(imglist, fmt.Sprintf("%s", imgs[i][1]))
+	}
+
+	ti.item.data["imgs"] = strings.Join(imglist, ",")
 	return ti
 }
 
-func (ti *Taobao) GetShopRank() *Taobao {
+func (ti *Taobao) GetShopLogo() *Taobao {
 	hp := NewHtmlParse().LoadData(ti.content)
-	rank := hp.Partten(`(?U)http://pics.taobaocdn.com/newrank/s_(.*).gif`).FindStringSubmatch()
-	if rank == nil {
-		ti.item.err = errors.New(`get imgs error`)
+
+	img := hp.Partten(`(?U)<a.*data-uid="` + ti.item.data["uid"] + `".*> <img src="(.*)" .*/> </a>`).FindStringSubmatch()
+	if img == nil {
+		ti.item.err = errors.New(`get shop img error`)
 		return ti
 	}
-	ti.item.data["rank"] = rank[1]
+	ti.item.data["img"] = fmt.Sprintf("%s", img[1])
 	return ti
 }
 
