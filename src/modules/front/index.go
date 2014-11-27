@@ -6,7 +6,7 @@ import (
 	spider "libs/spider"
 	// "math/rand"
 	"os"
-	"time"
+	// "time"
 )
 
 var page int = 1
@@ -42,6 +42,7 @@ func (c *Index) Test() {
 func doLoadData(params map[string]string) {
 	var flag bool = true
 	var filename string = fmt.Sprintf("%s-%s-%s.csv", params["startTime"], params["endTime"], params["queryType"])
+	fmt.Println(filename)
 	if f == nil {
 		fd, err := os.Create(filename)
 
@@ -74,13 +75,12 @@ func doLoadData(params map[string]string) {
 		}
 
 		page++
-		time.Sleep(time.Second)
+		// time.Sleep(time.Second)
 	}
 }
 
 func load(params map[string]string, page int) ([]byte, error) {
-	url := fmt.Sprintf("http://pub.alimama.com/report/getTbkPaymentDetails.json?startTime=%s&endTime=%s&payStatus=%s&queryType=%s&toPage=%d&perPageSize=20", params["startTime"], params["endTime"], params["queryType"], params["queryType"], page)
-
+	url := fmt.Sprintf("http://pub.alimama.com/report/getTbkPaymentDetails.json?startTime=%s&endTime=%s&queryType=%s&toPage=%d&perPageSize=20", params["startTime"], params["endTime"], params["queryType"], page)
 	//get content
 	loader := spider.NewLoader(url, "Get")
 	loader.SetHeader("Cookie", params["cookie"])
@@ -112,12 +112,11 @@ func dataToString(d []byte, flag *bool, total *int) string {
 			hp.FindJsonInt("auctionNum")[0][1],
 			hp.FindJsonStr("createTime")[0][1],
 			hp.FindJsonInt("payPrice")[0][1])*/
-
 			output += fmt.Sprintf("%s,%s,%s, %s\n",
 				hp.FindJsonStr("auctionTitle")[0][1],
 				hp.FindJsonInt("auctionNum")[0][1],
-				hp.FindJsonStr("earningTime")[0][1],
-				hp.FindJsonStr("realPayFeeString")[0][1])
+				hp.FindJsonStr("createTime")[0][1],
+				hp.FindJsonInt("payPrice")[0][1])
 			*total++
 		}
 	}

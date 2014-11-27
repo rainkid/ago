@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os/exec"
 )
 
 type Other struct {
@@ -14,8 +13,6 @@ type Other struct {
 
 func (ti *Other) Get() {
 	//get content
-	ti.item.url = ti.item.id
-	fmt.Println(ti.item.url)
 
 	var content []byte
 	var err error
@@ -23,18 +20,9 @@ func (ti *Other) Get() {
 	loader := NewLoader(ti.item.id, "Get")
 	content, err = loader.Send(nil)
 
-	/*if bytes.Index([]byte(ti.item.url), []byte("m.jd.com")) > 0 {
-		content, err = ti.GetContent(ti.item.url)
-	} else {
-		content, err = loader.Send(nil)
-	}*/
-
-	if loader.redirects > 20 {
-		content, err = ti.GetContent(ti.item.url)
-	}
-
-	ti.item.err = err
-	if ti.CheckError() {
+	if err != nil && ti.item.tryTimes < TryTime {
+		ti.item.err = err
+		SpiderServer.qstart <- ti.item
 		return
 	}
 
@@ -49,10 +37,16 @@ func (ti *Other) Get() {
 		needconv = false
 	}
 
-	if bytes.Index(ct, []byte("gbk")) > 0 {
+	if needconv && bytes.Index(ct, []byte("gbk")) > 0 {
 		hp.Convert()
 		needconv = false
 	}
+
+	if needconv && bytes.Index(ct, []byte("gb2312")) > 0 {
+		hp.Convert()
+		needconv = false
+	}
+
 	if needconv && hp.IsGbk() {
 		hp.Convert()
 	}
@@ -63,14 +57,7 @@ func (ti *Other) Get() {
 	if ti.GetOtherTitle().CheckError() {
 		return
 	}
-	// fmt.Println(ti.item.data)
-	Server.qfinish <- ti.item
-}
-
-func (ti *Other) GetContent(s string) ([]byte, error) {
-	url := fmt.Sprintf("http://rainkid.sinaapp.com/spider.php?url=%s", s)
-	cmd := exec.Command("curl", url)
-	return cmd.Output()
+	SpiderServer.qfinish <- ti.item
 }
 
 func (ti *Other) GetOtherTitle() *Other {
@@ -87,7 +74,7 @@ func (ti *Other) GetOtherTitle() *Other {
 
 func (ti *Other) CheckError() bool {
 	if ti.item.err != nil {
-		Server.qerror <- ti.item
+		SpiderServer.qerror <- ti.item
 		return true
 	}
 	return false

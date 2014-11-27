@@ -14,17 +14,18 @@ type MMB struct {
 func (ti *MMB) Item() {
 	url := fmt.Sprintf("http://mmb.cn/wap/touch/html/product/id_%s.htm", ti.item.id)
 
-	ti.item.url = url
 	//get content
 	loader := NewLoader(url, "Get")
 	content, err := loader.Send(nil)
-	ti.item.err = err
-	if ti.CheckError() {
+
+	if err != nil && ti.item.tryTimes < 3 {
+		ti.item.err = err
+		SpiderServer.qstart <- ti.item
 		return
 	}
 
 	hp := NewHtmlParse()
-	hp = hp.LoadData(content)
+	hp = hp.LoadData(content).Replace()
 	ti.content = hp.content
 	// ti.content = fmt.Sprintf("%s", content)
 	//get title and check
@@ -38,7 +39,7 @@ func (ti *MMB) Item() {
 	if ti.GetItemImg().CheckError() {
 		return
 	}
-	Server.qfinish <- ti.item
+	SpiderServer.qfinish <- ti.item
 }
 
 func (ti *MMB) GetItemTitle() *MMB {
@@ -58,7 +59,7 @@ func (ti *MMB) GetItemPrice() *MMB {
 	price := hp.Partten(`(?U)￥.*(\d{1,10}\.\d{1,2})`).FindStringSubmatch()
 
 	if price == nil {
-		price = hp.Partten(`(?U)￥<span.*>(.*)</span>`).FindStringSubmatch()
+		price = hp.Partten(`(?U)￥<em>(.*)</em>`).FindStringSubmatch()
 	}
 	if price == nil {
 		ti.item.err = errors.New(`get price error`)
@@ -85,7 +86,7 @@ func (ti *MMB) GetItemImg() *MMB {
 
 func (ti *MMB) CheckError() bool {
 	if ti.item.err != nil {
-		Server.qerror <- ti.item
+		SpiderServer.qerror <- ti.item
 		return true
 	}
 	return false

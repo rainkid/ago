@@ -3,17 +3,22 @@ package spider
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	utils "libs/utils"
 	"net/url"
-	"os"
-	"time"
 )
 
 var (
-	Server *Spider
-	loger  *log.Logger = log.New(os.Stdout, "[SPIDER] ", log.Ldate|log.Ltime)
-	smsUrl string      = "http://gou.3gtest.gionee.com/api/wifi/sms"
+	SpiderServer *Spider
+	SpiderProxy  *Proxy
+	spiderErrors *SpiderErrors = &SpiderErrors{}
+	SpiderLoger  *MyLoger      = NewMyLoger()
+	TryTime                    = 5
 )
+
+type SpiderErrors struct {
+	errorStr   string
+	errorTotal int
+}
 
 type Spider struct {
 	qstart  chan *Item
@@ -23,31 +28,41 @@ type Spider struct {
 
 type Item struct {
 	id       string
-	url      string
 	callback string
 	data     map[string]string
 	tag      string
+	tryTimes int
 	err      error
 }
 
 func NewSpider() *Spider {
-	Server = &Spider{
+	SpiderServer = &Spider{
 		qstart:  make(chan *Item),
 		qfinish: make(chan *Item),
 		qerror:  make(chan *Item),
 	}
-	return Server
+	return SpiderServer
 }
 
 func Start() *Spider {
-	if Server == nil {
-		Server = NewSpider()
-		go Server.Listen()
+	if SpiderServer == nil {
+		SpiderServer = NewSpider()
+		SpiderServer.Daemon()
 	}
-	return Server
+	if SpiderProxy == nil {
+		SpiderProxy = NewProxy()
+		SpiderProxy.Daemon()
+	}
+	return SpiderServer
+}
+
+func SendMail(title, content string) error {
+	return utils.SendMail("rainkid@163.com", "Rainkid,.0.", "smtp.163.com:25", "liaohu@gionee.com", title, content, "html")
 }
 
 func (spider *Spider) Do(item *Item) {
+	item.tryTimes++
+	SpiderLoger.I(fmt.Sprintf("item.id:%s,item.tag:%s try with %d times.", item.id, item.tag, item.tryTimes))
 	switch item.tag {
 	case "TmallItem":
 		ti := &Tmall{item: item}
@@ -79,25 +94,25 @@ func (spider *Spider) Do(item *Item) {
 
 func (spider *Spider) Error(item *Item) {
 	if item.err != nil {
-		loger.Println("[ERROR]", item.url, item.err.Error())
-		content := fmt.Sprintf("%s %s", item.url, item.err.Error())
-		url := fmt.Sprintf("%s?mobile=13809886150&content=%s&token=8153fa24b617b0165740211f4965dd2f", smsUrl, content)
-
-		loader := NewLoader(url, "Get")
-		_, err := loader.Send(nil)
-		if err != nil {
-			loger.Panicln("[ERROR] send sms error.")
+		sbody := fmt.Sprintf("id:%s tag:%s %s", item.id, item.tag, item.err.Error())
+		if spiderErrors.errorTotal == 10 {
+			err := SendMail("spider load data error.", sbody)
+			if err != nil {
+				SpiderLoger.E("send mail fail.")
+			}
 		}
+		spiderErrors.errorStr += sbody + "\n"
+		spiderErrors.errorTotal++
+		SpiderLoger.E(sbody)
 		item.err = nil
 	}
 	return
 }
 
 func (spider *Spider) Finish(item *Item) {
-	loger.Println("[SUCCESS]", item.url)
 	output, err := json.Marshal(item.data)
 	if err != nil {
-		loger.Println("error with json output")
+		SpiderLoger.E("error with json output")
 		return
 	}
 	v := url.Values{}
@@ -105,27 +120,21 @@ func (spider *Spider) Finish(item *Item) {
 	v.Add("data", fmt.Sprintf("%s", output))
 
 	url, _ := url.QueryUnescape(item.callback)
-	loader := NewLoader(url, "Post")
+	loader := NewLoader(url, "Post").WithProxy(false)
 	_, err = loader.Send(v)
 	if err != nil {
-		loger.Println("[ERROR] callback with error", err.Error())
+		SpiderLoger.E("callback with error", err.Error())
 		return
 	}
-	loger.Println("[SUCCESS] callback tag:", item.tag, ",item.id:", item.id, ",callback:", url)
+	SpiderLoger.I("success with", fmt.Sprintf("tag:%s,id:%s,url:%s", item.tag, item.id, url))
 	return
-}
-
-func (spider *Spider) Daemon() {
-	go spider.Listen()
-	for {
-		time.Sleep(time.Second * 5)
-	}
 }
 
 func (spider *Spider) Add(tag, id, callback string) {
 	item := &Item{
 		tag:      tag,
 		id:       id,
+		tryTimes: 0,
 		callback: callback,
 		data:     make(map[string]string),
 		err:      nil,
@@ -133,18 +142,20 @@ func (spider *Spider) Add(tag, id, callback string) {
 	spider.qstart <- item
 }
 
-func (spider *Spider) Listen() {
-	for {
-		select {
-		case item := <-spider.qstart:
-			go spider.Do(item)
-			break
-		case item := <-spider.qfinish:
-			go spider.Finish(item)
-			break
-		case item := <-spider.qerror:
-			go spider.Error(item)
-			break
+func (spider *Spider) Daemon() {
+	go func() {
+		for {
+			select {
+			case item := <-spider.qstart:
+				go spider.Do(item)
+				break
+			case item := <-spider.qfinish:
+				go spider.Finish(item)
+				break
+			case item := <-spider.qerror:
+				go spider.Error(item)
+				break
+			}
 		}
-	}
+	}()
 }

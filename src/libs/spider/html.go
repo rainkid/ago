@@ -135,7 +135,6 @@ func (hp *HtmlParse) FindAllSubmatch() [][][]byte {
 
 func (hp *HtmlParse) FindByAttr(tagName, attr, value string) [][][]byte {
 	hp.partten = fmt.Sprintf(`((?U)<%s+.*%s=['"]%s['"]+.*>(.*)</%s>).*?`, tagName, attr, value, tagName)
-	// hp.partten = fmt.Sprintf(`<(i?%s.*?%s=['"]%s['"].*?)>(.*?)<(\/i?%s.*?)>`, tagName, attr, value, tagName)
 	re := regexp.MustCompile(hp.partten)
 	// fmt.Println(re.String())
 	return re.FindAllSubmatch(hp.content, -1)
@@ -149,7 +148,7 @@ func (hp *HtmlParse) FindByTagName(tagName string) [][][]byte {
 }
 
 func (hp *HtmlParse) FindJsonStr(nodeName string) [][][]byte {
-	hp.partten = fmt.Sprintf(`(?U)"%s":"(.*)"`, nodeName)
+	hp.partten = fmt.Sprintf(`(?U)"%s":\s*?['"](.*)['"]`, nodeName)
 	re := regexp.MustCompile(hp.partten)
 	// fmt.Println(re.String())
 	return re.FindAllSubmatch(hp.content, -1)

@@ -1,9 +1,9 @@
 package api
 
 import (
-	"fmt"
 	spider "libs/spider"
 	// "net/url"
+	// "fmt"
 )
 
 type Tmall struct {
@@ -11,8 +11,15 @@ type Tmall struct {
 }
 
 func (c *Tmall) Test() {
-	d := c.GetPost("data")
-	fmt.Println("get post data:=", d)
+	/*ret := &spider.PingResult{}
+	err := spider.Ping(ret, "111.161.126.101")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Println(ret.Average)*/
+	// proxy := spider.NewSpiderProxy()
+	// proxy.Load()
 }
 
 func (c *Tmall) Item() {
