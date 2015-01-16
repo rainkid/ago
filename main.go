@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/rainkid/dogo"
+	pserver "libs/pserver"
 	"os"
 	"path"
 )
@@ -23,6 +24,8 @@ func main() {
 			dogo.Loger.Println("run time panic: ", err)
 		}
 	}()
+
+	pserver.Start()
 
 	router := getRouter()
 	app_ini := fmt.Sprintf("%s/app.ini", *cfgdir)
