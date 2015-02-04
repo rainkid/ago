@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net"
+	"libs/websock"
 )
 
 var (
@@ -102,6 +103,7 @@ func (i *PServer) DealMsg(client *Client) {
 		break
 	default:
 		fmt.Println(cmd)
+		websock.Server.SendData(client.data);
 		break
 	}
 }

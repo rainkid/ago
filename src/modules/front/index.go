@@ -6,6 +6,7 @@ import (
 	"io"
 	// "math/rand"
 	pserver "libs/pserver"
+	ws "libs/websock"
 	"os"
 	// "time"
 )
@@ -30,6 +31,20 @@ func (c *Index) Shop() {
 		fmt.Println("...")
 	}
 	c.Json(0, "aa", "data")
+}
+
+func (c *Index) Ppt() {
+
+}
+
+func (c *Index) Ppt1() {
+
+}
+
+
+func (c *Index) Next() {
+	ws.Server.SendData([]byte("next"))
+	c.Json(0,"success","")
 }
 
 func (c *Index) Server() {

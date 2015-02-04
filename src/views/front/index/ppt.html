@@ -1,0 +1,566 @@
+ {{define "content"}}
+ <!DOCTYPE html>
+<html class=" transition"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1">
+    <title>从地鼠搬运工谈程序设计</title>
+    <link href="/statics/front/css/default.css" class="theme" rel="stylesheet" media="screen">
+    <link href="/statics/front/css/common.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <nav id="helpers">
+      <button id="nav-first" type="checkbox" class="nav-prev" title="去首页">|&lt;</button>
+      <button title="Previous slide" id="nav-prev" class="nav-prev">&lt;</button> 
+      <button title="Jump to a random slide" id="slide-no">1</button> 
+      <button title="Next slide" id="nav-next" class="nav-next">&gt;</button>
+      <button id="nav-last" type="checkbox" class="nav-next" title="去尾页">&gt;|</button>
+      <menu>
+        <button type="checkbox" data-command="share" class="share" title="分享">分享</button>
+        <button type="checkbox" data-command="help" title="View Help">?</button>
+      </menu>
+    </nav>
+    <div class="presentation">
+      <div id="presentation-counter">1</div>
+      <div class="slides" style="display: block;">
+        <div class="slide current" id="landing-slide">
+          <style>
+            #landing-slide p {
+              font-size: 35px;
+            }
+          </style>
+          <section class="middle">
+            <p>这是一个使用HTML5制作的幻灯片</p>
+            <p>使用 <span id="left-init-key" class="key">→</span> 键开始播放。</p>
+          </section>
+
+          <aside class="note">
+            <section>
+              Welcome! (This field is for presenter notes and commentary.)
+            </section>
+          </aside> 
+        <span class="counter"></span></div>
+
+        <div class="slide future" id="controls-slide">
+          <header>控制键</header>
+          <style>
+            #controls-slide li, #controls-slide p {
+              font-size: 32px;
+            }
+            #controls-slide .key {
+              bottom: 2px;
+            }
+          </style>
+          <section>
+            <ul>
+              <li>使用 <span class="key">←</span> 和 <span class="key">→</span> 进行前后翻页。</li>
+              <li>使用 <span class="key">Ctrl/Command</span> 和 <span class="key">+</span> 或 <span class="key">-</span> 进行页面缩放。</li>
+              <li>按 <span class="key">3</span> 切换3D效果。</li>
+              <li>按 <span class="key">0</span> 显示帮助。</li>
+            </ul>
+          </section>
+        <span class="counter"></span></div> 
+ 
+
+        <div class="slide distant-slide" id="title-slide">
+          <style>
+            #title-slide h1, #title-slide h2 {
+              color: black;
+            }
+            #title-slide h1 {
+              font-size: 80px;
+            }
+            #title-slide h2 {
+              font-size: 36px;
+            }
+          </style>
+          <section class="middle">
+            <hgroup>
+              <font style="font-size:56px;color: black;">
+                
+                  <strong>从地鼠搬运工谈程序设计</strong><br>
+                
+              </font>
+              <font style="font-size:40px;color: black;">
+                <strong>rainkide<br>rainkide@gmail.com<br>https://github.com/rainkid</strong><br>
+              </font>
+            </hgroup>
+          </section>
+        <span class="counter"></span></div>
+
+    
+
+      <!-- end of slide 8 --><!-- start of slide 0 -->
+        <div class="slide distant-slide" id="slide-0">
+          <header>你来为地鼠安排工作</header>
+
+          <section>
+            <p>
+            一堆废书，一只地鼠，一只焚烧炉。<br>
+            </p>
+            
+
+
+
+<img src="/statics/front/img/gophersimple1.jpg">
+
+            <p>
+            <br>
+            
+            如何<font color="red">高效</font>的把一堆废书送到焚烧炉？<br>
+            
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 9 --><!-- start of slide 1 -->
+        <div class="slide distant-slide" id="slide-1">
+          <header>更多的地鼠！</header>
+
+          <section>
+            <p></p>
+            
+
+
+
+<img src="/statics/front/img/gophersimple3.jpg">
+
+            <p>
+            <br>
+            
+            更多的地鼠还不行；还需要更多的小推车。<br>
+            
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 10 --><!-- start of slide 2 -->
+        <div class="slide distant-slide" id="slide-2">
+          <header>更多的地鼠和更多的小推车</header>
+
+          <section>
+            <p></p>
+            
+
+
+
+<img src="/statics/front/img/gophersimple2.jpg">
+
+            <p>
+            <br>
+            
+            这样快多了，但在装运处和焚烧炉处出现了<font color="red">瓶颈</font>。<br>
+
+      <br>
+            
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 11 --><!-- start of slide 3 -->
+        <div class="slide distant-slide" id="slide-3">
+          <header>所有东西都增加一倍</header>
+
+          <section>
+            <p>
+            消除瓶颈；让他们能真正的相互独立不干扰。<br>
+            </p>
+            
+
+
+
+<img src="/statics/front/img/gophersimple4.jpg">
+
+            <p>
+            这样吞吐速度会快一倍。<br>
+            
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 12 --><!-- start of slide 4 -->
+        <div class="slide distant-slide" id="slide-4">
+          <header>并行任务</header>
+
+          <section>
+            <p></p>
+            
+
+
+
+<img src="/statics/front/img/gophersimple4.jpg">
+
+            <p>
+            同时执行，互不干拢。<br>
+            
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+       <!-- end slide template -->
+      <!-- end of slide 14 --><!-- start of slide 5 -->
+        <div class="slide distant-slide" id="slide-5">
+          <header>并发组合</header>
+
+          <section>
+            <p></p>
+            
+
+
+
+<img src="/statics/front/img/gophercomplex0.jpg">
+
+            <p>
+            <br>
+            
+            三只地鼠在工作，但看起来工作有些滞后。<br>
+            
+            每只地鼠都在做一种独立的工序，<br>
+            
+            并且相互合作(通信)。<br>
+            
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 15 --><!-- start of slide 6 -->
+        <div class="slide distant-slide" id="slide-6">
+          <header>更细分工的并发组合</header>
+
+          <section>
+            <p>
+            增加一只地鼠，专门运回空的小推车。<br>
+            </p>
+            
+
+
+
+<img src="/statics/front/img/gophercomplex1.jpg">
+
+            <p>
+            四只地鼠组成了一个优化的工作流程，每只只做自己一种简单的工序。<br>
+            
+            <br>
+            
+            如果任务布置的合理，这将会比最初一个地鼠的工作快4倍。<br>
+            
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 16 --><!-- start of slide 7 -->
+        <div class="slide distant-slide" id="slide-7">
+          <header>结果</header>
+
+          <section>
+            <p>
+            
+            <br>
+            
+            地鼠越多做的事情越多;<br>
+            
+            <br>
+            
+      任务越单一，每个地鼠的工作效率越高。<br>
+            
+            <br>
+            </p>
+            
+
+
+
+            <p>
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 17 --><!-- start of slide 8 -->
+        <div class="slide distant-slide" id="slide-8">
+          <header>并发过程</header>
+
+          <section>
+            <p>
+            四个地鼠有不同的工作环节：<br>
+            </p>
+            
+            <ul>
+            
+            <li>往小推车里装书</li>
+            
+            <li>移动小推车到焚烧炉</li>
+            
+            <li>卸载书到焚烧炉里</li>
+            
+            <li>送回空的小推车</li>
+            
+            </ul>
+
+            <p>
+            不同的并发设计能导致不同的并行方式。<br>
+            
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 18 --><!-- start of slide 9 -->
+        <div class="slide distant-slide" id="slide-9">
+          <header>更多的并行！</header>
+
+          <section>
+            <p>
+            现在我们可以让并行再多一倍；按照现在的并行模式很容易实现这些。八个地鼠，全部繁忙。<br>
+            </p>
+            
+
+
+
+<img src="/statics/front/img/gophercomplex2.jpg">
+
+            <p>
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 19 --><!-- start of slide 20 -->
+        <div class="slide distant-slide" id="slide-10">
+          <header>或者它们可以完全不并行</header>
+
+          <section>
+            <p>
+            请记住，只有一个地鼠在工作(零并行)，这仍然是一个正确的并发的工作方案。<br>
+            </p>
+            
+
+
+
+<img src="/statics/front/img/gophercomplex2.jpg">
+
+            <p>
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 20 --><!-- start of slide 21 -->
+        <div class="slide distant-slide" id="slide-11">
+          <header>换一种设计</header>
+
+          <section>
+            <p>
+            现在我们换一种设计来组织我们的地鼠的并发工作流程。<br>
+            
+            <br>
+            
+            两个地鼠，一个中转站。<br>
+            </p>
+            
+
+
+
+<img src="/statics/front/img/gophercomplex3.jpg">
+
+            <p>
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 21 --><!-- start of slide 22 -->
+        <div class="slide distant-slide" id="slide-12">
+          <header>让常规的流程并行化</header>
+
+          <section>
+            <p>
+            更多的并发流程能获得更多的吞吐量。<br>
+            </p>
+            
+
+
+
+<img src="/statics/front/img/gophercomplex4.jpg">
+
+            <p>
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 22 --><!-- start of slide 23 -->
+        <div class="slide distant-slide" id="slide-13">
+          <header>或者另外一种方法</header>
+
+          <section>
+            <p>
+            在每个中转站之间都引入多个地鼠并发的模式：<br>
+            
+            <br>
+            </p>
+            
+
+
+
+<img src="/statics/front/img/gophercomplex5.jpg">
+
+            <p>
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 23 --><!-- start of slide 24 -->
+        <div class="slide distant-slide" id="slide-14">
+          <header>全程优化</header>
+
+          <section>
+            <p>
+            使用这种技术策略，16个地鼠都很繁忙！<br>
+            
+            <br>
+            </p>
+            
+
+
+
+<img src="/statics/front/img/gophercomplex6.jpg">
+
+            <p>
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 24 --><!-- start of slide 25 -->
+        <div class="slide distant-slide" id="slide-15">
+          <header>习得</header>
+
+          <section>
+            <p>
+            有很多分解流程的方式。<br>
+            
+            <br>
+            
+            这都是并发设计。<br>
+            
+            <br>
+            
+            一旦完成了分解，并行可能会丧失，但很容易纠正。<br>
+            
+            <br>
+            </p>
+            
+
+
+
+            <p>
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+      <!-- end of slide 25 --><!-- start of slide 26 -->
+        <div class="slide distant-slide" id="slide-16">
+          <header>回到计算机世界</header>
+
+          <section>
+            <p>
+            将我们的运书工作替换成如下：<br>
+            </p>
+            
+            <ul>
+            
+            <li>书堆 =&gt; Web内容</li>
+            
+            <li>地鼠 =&gt; CPU</li>
+            
+            <li>小推车 =&gt; 调度，渲染或网络传输</li>
+            
+            <li>焚烧炉 =&gt; 代理，浏览器或其他消费源</li>
+            
+            </ul>
+            
+
+
+
+            <p>
+            我们现在的这种设计就是一种可扩展的Web服务的并发设计。<br>
+            
+            地鼠提供Web内容服务。<br>
+            
+            <br>
+            
+          </p></section>
+        <span class="counter"></span></div> <!-- end slide template -->
+
+        <div class="slide distant-slide" id="goodbye">
+          <section class="middle">
+            <font style="font-size:130px">Q & A</font>
+          </section>
+        <span class="counter"></span></div>
+
+      </div>
+
+      <div id="speaker-note" class="invisible" style="display: none;">
+              Welcome! (This field is for presenter notes and commentary.)
+            </div> <!-- speaker note -->
+      <aside id="help" class="sidebar invisible" style="display: hidden;">
+        <table>
+          <caption>帮助</caption>
+          <tbody>
+            <tr>
+              <th>翻页</th>
+              <td>←&nbsp;→</td>
+            </tr>
+            <tr>
+              <th>源文件</th>
+              <td>s</td>
+            </tr>
+            <tr>
+              <th>3D切换</th>
+              <td>3</td>
+            </tr>
+            <tr>
+              <th>帮助</th>
+              <td>0</td>
+            </tr>
+          </tbody>
+        </table>
+      </aside>
+
+    </div> <!-- presentation -->
+
+    <!--[if lt IE 9]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">
+    </script>
+    <script>CFInstall.check({ mode: "overlay" });</script>
+    <![endif]-->
+
+    <script src="/statics/front/js/utils.js"></script>
+    <script src="/statics/front/js/base64.js"></script>
+   <script type="text/javascript">
+      try {
+        var sock = new WebSocket("ws://3gtest.gionee.com:7788/sock");
+        console.log("Websocket - status: " + sock.readyState);
+        sock.onopen = function(m) { 
+          console.log("CONNECTION opened..." + this.readyState);
+        }
+        sock.onmessage = function(m) { 
+
+            var cmd = Base64.decode(m.data);
+            console.log("cmd =="+cmd);
+
+            if (cmd == "next") {
+                slideshow.next()
+            } else if (cmd == "pre") {
+                slideshow.prev()
+            } else if (cmd == "first") {
+                slideshow.go("landing-slide")
+            } else if (cmd == "end") {
+                slideshow.go("goodbye");
+            } else if (cmd == "3d") {
+                slideshow.switch3D();
+            }
+        }
+        sock.onerror = function(m) {
+          console.log("Error occured sending..." + m.data);
+        }
+        sock.onclose = function(m) { 
+          console.log("Disconnected - status " + this.readyState);
+        }
+      } catch(exception) {
+        console.log(exception);
+      }
+   </script>
+
+</body></html>
+
+   {{end}}

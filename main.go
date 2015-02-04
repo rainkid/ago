@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/rainkid/dogo"
 	pserver "libs/pserver"
+	websock "libs/websock"
 	"os"
 	"path"
 )
@@ -21,11 +22,12 @@ func main() {
 
 	defer func() {
 		if err := recover(); err != nil {
-			dogo.Loger.Println("run time panic: ", err)
+			dogo.Loger.E("run time panic: ", err)
 		}
 	}()
 
 	pserver.Start()
+	websock.Start()
 
 	router := getRouter()
 	app_ini := fmt.Sprintf("%s/app.ini", *cfgdir)
@@ -36,6 +38,7 @@ func main() {
 	// bootstrap and return a app
 	app := dogo.NewApp(app_ini)
 	//Bootstrap and run
+
 	app.Bootstrap(router).SetDefaultModule("api").Run()
 }
 
@@ -46,12 +49,9 @@ func getRouter() *dogo.Router {
 
 	//add static router
 	router.AddStaticRoute("/statics", path.Join(basepath, "src/statics/"))
-
-	//add sample route
-	AddSampleRoute(router)
-
 	//add regex router and default is sample route
 	router.AddRegexRoute("/", "/admin/login/index")
-
+	//add sample route
+	AddSampleRoute(router)
 	return router
 }
