@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/rainkid/dogo"
 	pserver "libs/pserver"
 	websock "libs/websock"
@@ -10,15 +9,13 @@ import (
 	"path"
 )
 
-var cfgdir = flag.String("c", "", "please input build dir with")
+var (
+	host = flag.String("h", "127.0.0.1", "hostname for app runtime")
+	port = flag.String("p", "8090", "port for app runtime")
+)
 
 func main() {
 	flag.Parse()
-	l := len(*cfgdir)
-	if l == 0 {
-		fmt.Println("please input build dir with -c")
-		os.Exit(0)
-	}
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -30,16 +27,12 @@ func main() {
 	websock.Start()
 
 	router := getRouter()
-	app_ini := fmt.Sprintf("%s/app.ini", *cfgdir)
-
-	dogo.Register.Set("app_ini", app_ini)
-	dogo.Register.Set("cfg_path", *cfgdir)
 
 	// bootstrap and return a app
-	app := dogo.NewApp(app_ini)
+	app := dogo.NewApp(*host, *port)
 	//Bootstrap and run
 
-	app.Bootstrap(router).SetDefaultModule("api").Run()
+	app.Bootstrap(router).SetDefaultModule("admin").Run()
 }
 
 func getRouter() *dogo.Router {
